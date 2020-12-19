@@ -73,7 +73,7 @@ const PlayerList = () => {
 // }
 export const GameScreen = () => {
   // const { sendPing } =
-  useWebRTC()
+  // useWebRTC()
   // sendPing()
   return (
     <GameRoot>
