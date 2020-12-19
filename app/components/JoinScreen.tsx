@@ -41,7 +41,6 @@ export const JoinScreen = () => {
 
   return (
     <>
-      {" "}
       <InputFıelds
         onChangeText={text => setUserName(text)}
         placeholder="username"
