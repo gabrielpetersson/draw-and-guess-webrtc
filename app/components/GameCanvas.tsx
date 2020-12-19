@@ -2,16 +2,16 @@ import React from "react"
 import { Dimensions } from "react-native"
 import Canvas from "react-native-canvas"
 
-export const GameCanvas = () => {
-  const [canvas, setCanvas] = React.useState()
-  return (
-    <Canvas
-      width={Dimensions.get("screen").width}
-      height={Dimensions.get("screen").width * 1.4} // 1.4 means all canvases will have the exact same ratio. easy to transfer lines
-      ref={canvas => setCanvas(canvas)}
-    />
-  )
-}
+// export const GameCanvas = () => {
+//   const [canvas, setCanvas] = React.useState()
+//   return (
+//     <Canvas
+//       width={Dimensions.get("screen").width}
+//       height={Dimensions.get("screen").width * 1.4} // 1.4 means all canvases will have the exact same ratio. easy to transfer lines
+//       ref={canvas => setCanvas(canvas)}
+//     />
+//   )
+// }
 
 // PanResponder.create({
 //   onMoveShouldSetPanResponder: () => true,
