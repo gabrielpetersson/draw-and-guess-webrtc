@@ -11,19 +11,13 @@ const FirstScreenRoot = styled.View`
 const ButtonContainer = styled.View`
   display: flex;
   justify-content: space-between;
-  width: 10%;
-  height: 10%;
 `
 const JoinButton = styled.Button`
   display: flex;
-  width: 50%;
-  height: 50%;
   background-color: pink;
 `
 const CreateButton = styled.Button`
   display: flex;
-  width: 50%;
-  height: 50%;
   color: #f194ff;
   background-color: #f194ff;
 `
@@ -32,7 +26,12 @@ const InputFıelds = styled.TextInput`
   border-radius: 0.2px;
   padding: 5px;
 `
-export const CreateScreen = () => {
+interface CreateScreenProps {
+  currentscreen: void
+}
+
+type Props = CreateScreenProps
+export const CreateScreen: React.FC<Props> = props => {
   const [userName, setUserName] = React.useState("")
   const [roomName, setRoomName] = React.useState("")
   const [currentScreen, setCurrentScreen] = React.useState<number>(0)
@@ -52,6 +51,9 @@ export const CreateScreen = () => {
       <JoinButton
         title="Join Room"
         disabled={!userName || !roomName}
+        onPress={() => {
+          props.currentscreen(1, userName, roomName)
+        }}
       ></JoinButton>
     </>
   )

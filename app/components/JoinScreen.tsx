@@ -34,7 +34,12 @@ const InputFıelds = styled.TextInput`
 `
 const ButtonText = styled.Text``
 
-export const JoinScreen = () => {
+interface JoinScreenProps {
+  currentscreen: void
+}
+
+type Props = JoinScreenProps
+export const JoinScreen: React.FC<Props> = props => {
   const [userName, setUserName] = React.useState("")
   const [roomName, setRoomName] = React.useState("")
   const [currentScreen, setCurrentScreen] = React.useState<number>(0)
@@ -54,6 +59,9 @@ export const JoinScreen = () => {
       <JoinButton
         title="Join Room"
         disabled={!userName || !roomName}
+        onPress={() => {
+          props.currentscreen(1, userName, roomName)
+        }}
       ></JoinButton>
     </>
   )
