@@ -5,6 +5,7 @@ import styled from "styled-components/native"
 import { GameCanvas } from "./GameCanvas"
 import { FirstScreen } from "./FirstScreen"
 import { Spacer } from "./Spacer"
+import { setupWebRTC, useWebRTC } from "../requests/setupWebRTC"
 
 const GameRoot = styled.View`
   width: ${Dimensions.get("window").width}px;
@@ -64,7 +65,16 @@ const PlayerList = () => {
   )
 }
 
+// const useWebRTC = () => {
+//   const peer = React.useRef(setupWebRTC()).current
+//   const sendPing = () => peer.send("ping")
+//   peer.on("ping", data => console.log("GOT: ", data))
+//   return { sendPing }
+// }
 export const GameScreen = () => {
+  // const { sendPing } =
+  useWebRTC()
+  // sendPing()
   return (
     <GameRoot>
       <FirstScreen />
