@@ -3,6 +3,7 @@ import { Dimensions } from "react-native"
 
 import styled from "styled-components/native"
 import { GameCanvas } from "./GameCanvas"
+import { FirstScreen } from "./FirstScreen"
 import { Spacer } from "./Spacer"
 
 const GameRoot = styled.View`
@@ -66,8 +67,9 @@ const PlayerList = () => {
 export const GameScreen = () => {
   return (
     <GameRoot>
-      <GameCanvas />
-      <PlayerList />
+      <FirstScreen />
+      {/* <GameCanvas />
+      <PlayerList /> */}
     </GameRoot>
   )
 }
