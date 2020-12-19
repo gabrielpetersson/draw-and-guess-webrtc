@@ -5,6 +5,7 @@ import styled from "styled-components/native"
 import { FirstScreen } from "./FirstScreen"
 import { Spacer } from "./Spacer"
 import { ChatUserComponent } from "./ChatUserComponent"
+import { useWebRTC } from "../requests/setupWebRTC"
 
 const GameRoot = styled.View`
   width: ${Dimensions.get("window").width}px;
@@ -72,16 +73,23 @@ const GameRoot = styled.View`
 // }
 export const GameScreen = () => {
   // const { sendPing } =
-  // useWebRTC()
+  const { game, createGame, joinGame } = useWebRTC()
   // sendPing()
   const [msg, setMsg] = React.useState("")
 
   return (
     <GameRoot>
       {/* <ChatUserComponent msg={msg} username={["Fatih", "Gabriel", "PETAR"]} /> */}
-      <FirstScreen />
+      <FirstScreen createGame={createGame} joinGame={joinGame} />
       {/* <GameCanvas />
       <PlayerList /> */}
     </GameRoot>
   )
 }
+
+// "react-native-webrtc": "^1.87.2",
+//     "simple-peer": "^9.9.3",
+//     "socket.io-client": "^3.0.4",
+//     "styled-components": "^5.2.1"
+// "react-native-canvas": "^0.1.37",
+//     "react-native-web": "^0.14.10"

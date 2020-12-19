@@ -29,7 +29,13 @@ const CreateButton = styled.Button`
   background-color: #f194ff;
 `
 
-export const FirstScreen = () => {
+export const FirstScreen = ({
+  createGame,
+  joinGame
+}: {
+  createGame: (gameName: string) => void
+  joinGame: (gameName: string) => void
+}) => {
   const [currentScreen, setCurrentScreen] = React.useState<number>(0)
 
   return (

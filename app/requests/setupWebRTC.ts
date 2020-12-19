@@ -1,29 +1,36 @@
 import React from "react"
 import {
   RTCPeerConnection,
-  RTCIceCandidate,
-  RTCSessionDescription,
-  RTCView,
-  MediaStream,
-  MediaStreamTrack,
-  mediaDevices,
-  registerGlobals,
-  RTCSessionDescriptionType
+  RTCIceCandidate
+  // RTCSessionDescriptionType
 } from "react-native-webrtc"
-import Socket from "socket.io-client"
+import { io } from "socket.io-client/build/index"
 
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
 // const pc = new RTCPeerConnection(configuration)
 
+interface User {
+  id: string
+  name?: string
+  points: number
+}
+interface Game {
+  owner: string
+  currentTurnIndex?: number
+  participants: Record<string, User>
+}
+
 export const useWebRTC = () => {
+  console.log("INIT")
   const peerConnections = React.useRef<Map<string, RTCPeerConnection>>(
     new Map()
   )
-  const [socket] = React.useState(Socket.connect("ws://localhost:8000"))
-
+  const socket = React.useRef(io("ws://192.168.8.100:8000")).current
+  const [game, setGame] = React.useState<Game | null>(null)
   React.useEffect(() => {
     socket.on("connect", () => {
       socket.emit("broadcaster")
+      socket.on("broadcaster", () => console.log("broadcaster"))
 
       socket.on("watcher", async (id: string) => {
         const connectionBuffer = new RTCPeerConnection(config)
@@ -36,34 +43,36 @@ export const useWebRTC = () => {
         }
 
         const localDescription = await connectionBuffer.createOffer()
-
         await connectionBuffer.setLocalDescription(localDescription)
-
         socket.emit("offer", id, connectionBuffer.localDescription)
-
         peerConnections.current.set(id, connectionBuffer)
       })
 
-      socket.on("candidate", (id: string, candidate: RTCIceCandidateType) => {
+      socket.on("candidate", (id: string, candidate: any) => {
         const candidateBuffer = new RTCIceCandidate(candidate as any)
         const connectionBuffer = peerConnections.current.get(id)
         if (!connectionBuffer) return
         connectionBuffer.addIceCandidate(candidateBuffer)
       })
 
-      socket.on(
-        "answer",
-        (id: string, remoteOfferDescription: RTCSessionDescriptionType) => {
-          const connectionBuffer = peerConnections.current.get(id)
-          if (!connectionBuffer) return
-          connectionBuffer.setRemoteDescription(remoteOfferDescription)
-        }
-      )
+      socket.on("answer", (id: string, remoteOfferDescription: any) => {
+        const connectionBuffer = peerConnections.current.get(id)
+        if (!connectionBuffer) return
+        connectionBuffer.setRemoteDescription(remoteOfferDescription)
+      })
 
       socket.on("disconnectPeer", (id: string) => {
         if (!peerConnections.current) return
         peerConnections.current.get(id)?.close()
         peerConnections.current.delete(id)
+      })
+
+      socket.on("game", (game: Game) => {
+        setGame(game)
+      })
+
+      socket.on("leaveGame", () => {
+        setGame(null)
       })
     })
 
@@ -71,4 +80,10 @@ export const useWebRTC = () => {
       if (socket.connected) socket.close()
     }
   }, [socket])
+
+  return {
+    createGame: (roomName: string) => socket.emit("createGame", { roomName }),
+    joinGame: (roomName: string) => socket.emit("createGame", { roomName }),
+    game
+  }
 }

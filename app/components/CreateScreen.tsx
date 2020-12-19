@@ -28,7 +28,7 @@ const CreateButton = styled.Button`
   background-color: #f194ff;
 `
 const InputFıelds = styled.TextInput`
-  border: 1px 
+  border: 1px;
   border-radius: 0.2px;
   padding: 5px;
 `
