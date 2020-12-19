@@ -29,7 +29,7 @@ const CreateButton = styled.Button`
 `
 const InputFıelds = styled.TextInput`
   border: 1px solid black;
-  border-radius: 0.2em;
+  border-radius: 0.2px;
   padding: 5px;
 `
 const ButtonText = styled.Text``
@@ -41,7 +41,6 @@ export const JoinScreen = () => {
 
   return (
     <>
-      {" "}
       <InputFıelds
         onChangeText={text => setUserName(text)}
         placeholder="username"

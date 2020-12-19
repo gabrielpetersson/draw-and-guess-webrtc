@@ -28,7 +28,6 @@ const CreateButton = styled.Button`
   color: #f194ff;
   background-color: #f194ff;
 `
-const ButtonText = styled.Text``
 
 export const FirstScreen = () => {
   const [currentScreen, setCurrentScreen] = React.useState<number>(0)

@@ -28,8 +28,8 @@ const CreateButton = styled.Button`
   background-color: #f194ff;
 `
 const InputFıelds = styled.TextInput`
-  border: 1px solid black;
-  border-radius: 0.2em;
+  border: 1px 
+  border-radius: 0.2px;
   padding: 5px;
 `
 export const CreateScreen = () => {
@@ -39,7 +39,6 @@ export const CreateScreen = () => {
 
   return (
     <>
-      {" "}
       <InputFıelds
         onChangeText={text => setUserName(text)}
         placeholder="username"
