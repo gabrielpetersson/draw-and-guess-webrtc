@@ -57,6 +57,7 @@ const GuessButton = styled.Button`
 interface ChatUserComponentProps {
   username: string[]
   msg: string
+  roomname: string
 }
 
 type Props = ChatUserComponentProps
@@ -82,8 +83,8 @@ export const ChatUserComponent: React.FC<Props> = props => {
             title="Send"
           ></GuessButton>
         </InputBox>
-        <ChatMessage username={"fatih"} msg={currentmsg}></ChatMessage>
-
+        {/* <ChatMessage username={"fatih"} msg={currentmsg}></ChatMessage> */}
+        {/* <Text style={{ color: "black" }}>{props.roomname}</Text> */}
         <ChatBox>
           {props.username.map(user => {
             return (

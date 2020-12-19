@@ -12,8 +12,6 @@ const FirstScreenRoot = styled.View`
 const ButtonContainer = styled.View`
   display: flex;
   justify-content: space-between;
-  width: 10%;
-  height: 10%;
 `
 const JoinButton = styled.Button`
   display: flex;
@@ -28,8 +26,13 @@ const CreateButton = styled.Button`
   color: #f194ff;
   background-color: #f194ff;
 `
+interface MenuScreenProps {
+  currentscreen: void
+}
 
-export const FirstScreen = () => {
+type Props = MenuScreenProps
+
+export const MenuScreen: React.FC<Props> = props => {
   const [currentScreen, setCurrentScreen] = React.useState<number>(0)
 
   return (
@@ -37,12 +40,12 @@ export const FirstScreen = () => {
       <ButtonContainer>
         {currentScreen == 1 && (
           <>
-            <JoinScreen></JoinScreen>
+            <JoinScreen currentscreen={props.currentscreen}></JoinScreen>
           </>
         )}
         {currentScreen == 2 && (
           <>
-            <CreateScreen></CreateScreen>
+            <CreateScreen currentscreen={props.currentscreen}></CreateScreen>
           </>
         )}
         {currentScreen == 0 && (

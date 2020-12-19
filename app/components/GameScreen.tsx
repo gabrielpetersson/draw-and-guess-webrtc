@@ -2,7 +2,7 @@ import React from "react"
 import { Dimensions } from "react-native"
 
 import styled from "styled-components/native"
-import { FirstScreen } from "./FirstScreen"
+import { MenuScreen } from "./FirstScreen"
 import { Spacer } from "./Spacer"
 import { ChatUserComponent } from "./ChatUserComponent"
 
@@ -75,11 +75,32 @@ export const GameScreen = () => {
   // useWebRTC()
   // sendPing()
   const [msg, setMsg] = React.useState("")
-
+  const [username, setUsername] = React.useState("")
+  const [roomName, setRoomName] = React.useState("")
+  const [currentScreen, setCurrentScreen] = React.useState(0)
+  const changecurrentscreen = (number, username, roomname) => {
+    setCurrentScreen(number)
+    setUsername(username)
+    setRoomName(roomName)
+  }
   return (
     <GameRoot>
-      {/* <ChatUserComponent msg={msg} username={["Fatih", "Gabriel", "PETAR"]} /> */}
-      <FirstScreen />
+      {currentScreen === 0 && (
+        <MenuScreen currentscreen={changecurrentscreen} />
+      )}
+      {currentScreen === 1 && (
+        <ChatUserComponent
+          username={[username]}
+          roomname={roomName}
+          msg="hello"
+        />
+      )}
+      {/* <ChatUserComponent
+        changecurrentscreen={changecurrentscreen}
+        msg={msg}
+        username={["Fatih", "Gabriel", "PETAR"]}
+      /> */}
+
       {/* <GameCanvas />
       <PlayerList /> */}
     </GameRoot>
