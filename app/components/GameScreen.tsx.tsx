@@ -6,14 +6,11 @@ import { ChatMessage } from "./ChatMessage"
 
 const GameRoot = styled.View`
   flex-direction: column;
-  width: ${Dimensions.get("window").width}px;
-  height: ${Dimensions.get("window").height}px;
+  width: ${Dimensions.get("screen").width}px;
+  height: ${Dimensions.get("screen").height}px;
   align-self: flex-end;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  height: 20%;
   background-color: white;
 `
 const InputBox = styled.View`
@@ -38,8 +35,6 @@ const ChatBox = styled.View`
 const ChatContainer = styled.View`
   display: flex;
   flex-direction: row;
-  border-radius: 5px;
-  padding: 5px;
   justify-content: space-evenly;
   background-color: pink;
 `
@@ -68,15 +63,14 @@ export const GameScreen = ({ game }: ChatUserComponentProps) => {
 
   return (
     <GameRoot>
-      <InputBox>
-        <TextInput
-          placeholderTextColor="white"
-          placeholder="Guess.."
-          value={guess}
-          onChangeText={(text: string) => setGuess(text)}
-          onSubmitEditing={() => handleSendMessage(guess)}
-        />
-      </InputBox>
+      <TextInput
+        placeholderTextColor="white"
+        placeholder="Guess.."
+        value={guess}
+        onChangeText={(text: string) => setGuess(text)}
+        onSubmitEditing={() => handleSendMessage(guess)}
+      />
+
       {/* <ChatMessage username={"fatih"} msg={currentmsg}></ChatMessage> */}
       {/* <Text style={{ color: "black" }}>{props.roomname}</Text> */}
       <ChatBox>
