@@ -1,55 +1,47 @@
 import React from "react"
-import { Dimensions, SafeAreaView, Text, TextInput } from "react-native"
+import {
+  Dimensions,
+  KeyboardAvoidingView,
+  SafeAreaView,
+  Text,
+  TextInput
+} from "react-native"
 import styled from "styled-components/native"
-import { Game } from "../requests/setupWebRTC"
-import { ChatMessage } from "./ChatMessage"
+import { Game } from "../../shared"
 
 const GameRoot = styled.View`
   flex-direction: column;
-  width: ${Dimensions.get("screen").width}px;
-  height: ${Dimensions.get("screen").height}px;
-  align-self: flex-end;
+  width: 100%;
+  height: 100%;
   justify-content: flex-end;
-  align-items: center;
   background-color: white;
 `
-const InputBox = styled.View`
-  display: flex;
-  background-color: black;
-  padding: 5px;
-  width: 50%;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-`
-const InputFıeld = styled.TextInput`
-  color: white;
-`
-const ChatBox = styled.View`
+const Players = styled.View`
   display: flex;
   flex-direction: row;
   width: 100%;
-
-  flex-wrap: wrap;
+  height: 40px;
   justify-content: space-evenly;
+  align-items: center;
+  background-color: blue;
 `
-const ChatContainer = styled.View`
+const PlayerContainer = styled.View`
   display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  background-color: pink;
-`
-const ChatContainerLeft = styled.View`
-  display: flex;
+  align-items: center;
   justify-content: center;
+  background-color: pink;
+  height: 60%;
+  width: 20%;
 `
-const ChatContainerRight = styled.View`
-  display: flex;
+const PlayerName = styled.Text``
+const Message = styled.Text<{ nthMessage: number }>`
+  position: absolute;
+  left: 0;
+  top: ${p => p.nthMessage * -20 - 5};
+  height: 16px;
+  font-size: 12px;
+  width: 100%;
 `
-const ChatText = styled.Text``
-const GuessButton = styled.Button`
-  display: flex;
-`
-
 interface ChatUserComponentProps {
   game: Game
 }
@@ -62,28 +54,31 @@ export const GameScreen = ({ game }: ChatUserComponentProps) => {
   }
 
   return (
-    <GameRoot>
-      <TextInput
-        placeholderTextColor="white"
-        placeholder="Guess.."
-        value={guess}
-        onChangeText={(text: string) => setGuess(text)}
-        onSubmitEditing={() => handleSendMessage(guess)}
-      />
+    <KeyboardAvoidingView behavior="height">
+      <GameRoot>
+        <TextInput
+          placeholderTextColor="white"
+          placeholder="Guess.."
+          value={guess}
+          onChangeText={(text: string) => setGuess(text)}
+          onSubmitEditing={() => handleSendMessage(guess)}
+        />
 
-      {/* <ChatMessage username={"fatih"} msg={currentmsg}></ChatMessage> */}
-      {/* <Text style={{ color: "black" }}>{props.roomname}</Text> */}
-      <ChatBox>
-        {Object.entries(game.participants).map(([userId, user]) => {
-          return (
-            <ChatContainer key={userId}>
-              <ChatContainerLeft>
-                <ChatText>{user.name}</ChatText>
-              </ChatContainerLeft>
-            </ChatContainer>
-          )
-        })}
-      </ChatBox>
-    </GameRoot>
+        {/* <ChatMessage username={"fatih"} msg={currentmsg}></ChatMessage> */}
+        {/* <Text style={{ color: "black" }}>{props.roomname}</Text> */}
+        <Players>
+          {Object.entries(game.participants).map(([userId, player]) => {
+            return (
+              <PlayerContainer key={userId}>
+                {player.guesses.map(msg => (
+                  <Message>{msg}</Message>
+                ))}
+                <PlayerName>{player.name}</PlayerName>
+              </PlayerContainer>
+            )
+          })}
+        </Players>
+      </GameRoot>
+    </KeyboardAvoidingView>
   )
 }

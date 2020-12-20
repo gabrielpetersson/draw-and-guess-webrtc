@@ -1,24 +1,9 @@
 import React from "react"
-import {
-  RTCPeerConnection,
-  RTCIceCandidate
-  // RTCSessionDescriptionType
-} from "react-native-webrtc"
+import { RTCPeerConnection, RTCIceCandidate } from "react-native-webrtc"
 import { io } from "socket.io-client/build/index"
+import { Game, User } from "../../shared"
 
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
-// const pc = new RTCPeerConnection(configuration)
-
-export interface User {
-  id: string
-  name?: string
-  points: number
-}
-export interface Game {
-  owner: string
-  currentTurnIndex?: number
-  participants: Record<string, User>
-}
 
 export const useWebRTC = ({
   setError
