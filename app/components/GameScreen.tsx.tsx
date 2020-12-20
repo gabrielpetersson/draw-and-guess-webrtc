@@ -26,6 +26,9 @@ const Players = styled.View`
   height: 40px;
   justify-content: space-evenly;
   align-items: center;
+  border-top-color: gray;
+  border-top-width: 1px;
+  background-color: #f4f4f4;
 `
 const PlayerContainer = styled.View`
   display: flex;
@@ -72,8 +75,9 @@ const LeaveText = styled.Text`
   text-transform: uppercase;
 `
 const GameCanvas = styled.View`
-  width: 100%;
-  height: 100px;
+  width: ${Dimensions.get("screen").width}px;
+  height: ${Dimensions.get("screen").width}px;
+  background-color: red;
 `
 const GameHeader = styled.View`
   position: absolute;
