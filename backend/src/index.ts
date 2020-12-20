@@ -2,6 +2,14 @@ import express from "express"
 import http from "http"
 import * as SocketIO from "socket.io"
 
+import {
+  Game,
+  Games,
+  JoinGameOptions,
+  CreateGameOptions,
+  User
+} from "../../shared"
+
 const app = express()
 const server = new http.Server(app)
 const io = new SocketIO.Server(server)
@@ -14,44 +22,30 @@ app.get("/", (req, res) => {
 io.sockets.on("error", e => console.log(e))
 server.listen(port, () => console.log(`Server is running on port ${port}`))
 
-interface NewGameOptions {
-  roomName: string
-  name: string
-}
-interface JoinGameOptions {
-  roomName: string
-  name: string
-}
-interface User {
-  id: string
-  name?: string
-  points: number
-}
-interface Game {
-  owner: string
-  currentTurnIndex?: number
-  participants: Record<string, User>
-}
-
 const createUser = (id: string, name?: string): User => ({
   id,
   name: name ?? Math.floor(Math.random() * 1000).toString(),
-  points: 0
+  points: 0,
+  guesses: []
 })
-type Games = Record<string, Game>
+
 let broadcaster = ""
 let games: Games = {}
+let userToGame: Record<string, string> = {}
+
 console.log("LOG")
 io.on("connection", (socket: SocketIO.Socket) => {
-  console.log("connection")
-  socket.on("broadcaster", () => {
-    broadcaster = socket.id
-    socket.broadcast.emit("broadcaster")
-  })
+  console.log("connection", socket.id)
+  // socket.on("broadcaster", () => {
+  //   console.log("BROADSTER", socket.id)
+  //   broadcaster = socket.id
+  //   socket.broadcast.emit("broadcaster")
+  // })
   socket.on("watcher", () => {
     socket.to(broadcaster).emit("watcher", socket.id)
   })
   socket.on("disconnect", () => {
+    console.log("DISCONNEDRED", socket.id)
     socket.to(broadcaster).emit("disconnectPeer", socket.id)
   })
   socket.on("offer", (id: string, message: string) => {
@@ -66,23 +60,55 @@ io.on("connection", (socket: SocketIO.Socket) => {
   socket.on("comment", (id: string, message: string) => {
     socket.to(id).emit("comment", socket.id, message)
   })
-  socket.on("createGame", (newGame: NewGameOptions) => {
-    console.log("creatre", newGame)
-    games[newGame.roomName] = {
+  const checkGameExist = (gameName: string) => {
+    if (!games[gameName]) {
+      console.log("NO GAME", gameName)
+      socket.emit("error", "No game for guess")
+      return false
+    }
+    return true
+  }
+  const emitGame = (gameName: string) => {
+    if (!checkGameExist(gameName)) return
+    io.sockets.emit("game", games[gameName])
+  }
+  socket.on("makeGuess", (guess: string) => {
+    const gameName = userToGame[socket.id]
+    if (!checkGameExist(gameName)) return
+    games[gameName].participants[socket.id].guesses.push(guess)
+    console.log("make guess", guess)
+    emitGame(gameName)
+  })
+  socket.on("leaveGame", () => {
+    const gameName = userToGame[socket.id]
+    if (checkGameExist(gameName)) delete games[gameName].participants[socket.id]
+    delete userToGame[socket.id]
+    emitGame(gameName)
+  })
+  socket.on("createGame", (createGameOpts: CreateGameOptions) => {
+    // socket.join(createGameOpts.gameName)
+    userToGame[socket.id] = createGameOpts.gameName
+    games[createGameOpts.gameName] = {
       owner: socket.id,
-      participants: { [socket.id]: createUser(socket.id, newGame.name) }
+      participants: {
+        [socket.id]: createUser(socket.id, createGameOpts.playerName)
+      }
     }
-    socket.emit("game", games[newGame.roomName])
+    socket.join(createGameOpts.gameName)
+    console.log("create room", games[createGameOpts.gameName])
+    emitGame(createGameOpts.gameName)
   })
-  socket.on("joinGame", (joinGame: JoinGameOptions) => {
-    if (!games[joinGame.roomName]) {
-      socket.emit("error", "No room ")
-      return
-    }
-    games[joinGame.roomName].participants[socket.id] = createUser(
+  socket.on("joinGame", (joinGameOpts: JoinGameOptions) => {
+    userToGame[socket.id] = joinGameOpts.gameName
+    if (!checkGameExist(joinGameOpts.gameName)) return
+    games[joinGameOpts.gameName].participants[socket.id] = createUser(
       socket.id,
-      joinGame.name
+      joinGameOpts.playerName
     )
-    socket.emit("game", games[joinGame.roomName])
+    socket.join(joinGameOpts.gameName)
+    console.log("joined room", games[joinGameOpts.gameName])
+    emitGame(joinGameOpts.gameName)
   })
+
+  socket.emit("leaveGame") // for server restarts
 })
