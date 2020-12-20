@@ -1,5 +1,5 @@
 import React from "react"
-import { RTCPeerConnection, RTCIceCandidate } from "react-native-webrtc"
+// import { RTCPeerConnection, RTCIceCandidate } from "react-native-webrtc"
 import { io } from "socket.io-client/build/index"
 import { Game, User } from "../../shared"
 
@@ -11,9 +11,9 @@ export const useWebRTC = ({
   setError: (error: string) => void
 }) => {
   console.log("INIT")
-  const peerConnections = React.useRef<Map<string, RTCPeerConnection>>(
-    new Map()
-  )
+  // const peerConnections = React.useRef<Map<string, RTCPeerConnection>>(
+  //   new Map()
+  // )
   const socket = React.useRef(io("ws://192.168.8.100:8000")).current
   const [game, setGame] = React.useState<Game | null>(null)
   React.useEffect(() => {
@@ -24,7 +24,7 @@ export const useWebRTC = ({
       socket.on("broadcaster", () => console.log("broadcaster"))
 
       socket.on("watcher", async (id: string) => {
-        const connectionBuffer = new RTCPeerConnection(config)
+        // const connectionBuffer = new RTCPeerConnection(config)
         // const dataChannel = connectionBuffer.createDataChannel("sendChannel")
         // dataChannel.onopen = (d: any) => console.log(d)
         // dataChannel.onclose = (d: any) => console.log(d)
@@ -40,7 +40,7 @@ export const useWebRTC = ({
       })
 
       socket.on("candidate", (id: string, candidate: any) => {
-        const candidateBuffer = new RTCIceCandidate(candidate as any)
+        // const candidateBuffer = new RTCIceCandidate(candidate as any)
         const connectionBuffer = peerConnections.current.get(id)
         if (!connectionBuffer) return
         connectionBuffer.addIceCandidate(candidateBuffer)
