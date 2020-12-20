@@ -7,20 +7,28 @@ import { GameScreen as GameScreen } from "./GameScreen.tsx"
 import { useWebRTC } from "../requests/setupWebRTC"
 
 const GameRoot = styled.View`
+  position: relative;
   width: 100%;
   height: 100%;
   background: gray;
 `
+const ErrorText = styled.Text`
+  position: absolute;
+  color: red;
+  top: 10px;
+  left: 10px;
+  z-index: 1000000;
+`
 
 export const MainScreen = () => {
-  const [error, setError] = React.useState("")
-  const { game, createGame, joinGame } = useWebRTC({ setError })
-  console.log("game", game)
+  // const [error, setError] = React.useState("")
+  const { game, createGame, joinGame, makeGuess, leaveGame } = useWebRTC()
+  const error = "error"
   return (
     <GameRoot>
-      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
+      {error ? <ErrorText style={{ color: "red" }}>{error}</ErrorText> : null}
       {game ? (
-        <GameScreen game={game} />
+        <GameScreen leaveGame={leaveGame} game={game} makeGuess={makeGuess} />
       ) : (
         <MenuScreen createGame={createGame} joinGame={joinGame} />
       )}

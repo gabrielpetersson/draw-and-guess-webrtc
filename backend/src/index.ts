@@ -1,6 +1,7 @@
 import express from "express"
 import http from "http"
 import * as SocketIO from "socket.io"
+import { uuid } from "uuidv4"
 
 import {
   Game,
@@ -75,7 +76,10 @@ io.on("connection", (socket: SocketIO.Socket) => {
   socket.on("makeGuess", (guess: string) => {
     const gameName = userToGame[socket.id]
     if (!checkGameExist(gameName)) return
-    games[gameName].participants[socket.id].guesses.push(guess)
+    games[gameName].participants[socket.id].guesses.push({
+      id: uuid(),
+      text: guess
+    })
     console.log("make guess", guess)
     emitGame(gameName)
   })

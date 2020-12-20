@@ -1,27 +1,23 @@
 import React from "react"
 import { RTCPeerConnection, RTCIceCandidate } from "react-native-webrtc"
-import { io } from "socket.io-client/build/index"
-import { Game, User } from "../../shared"
+import { io, Socket } from "socket.io-client/build/index"
+import { CreateGameOptions, Game, JoinGameOptions, User } from "../../shared"
 
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
 
-export const useWebRTC = ({
-  setError
-}: {
-  setError: (error: string) => void
-}) => {
-  console.log("INIT")
+export const useWebRTC = () => {
+  const [error, setError] = React.useState("")
   const peerConnections = React.useRef<Map<string, RTCPeerConnection>>(
     new Map()
   )
-  const socket = React.useRef(io("ws://192.168.8.100:8000")).current
   const [game, setGame] = React.useState<Game | null>(null)
+  const [socket, setSocket] = React.useState<Socket | null>(null)
   React.useEffect(() => {
-    console.log("trying...")
+    const socket = io("ws://192.168.8.100:8000")
     socket.on("connect", () => {
       console.log("connected")
-      socket.emit("broadcaster")
-      socket.on("broadcaster", () => console.log("broadcaster"))
+      // socket.emit("broadcaster")
+      // socket.on("broadcaster", () => console.log("broadcaster"))
 
       socket.on("watcher", async (id: string) => {
         const connectionBuffer = new RTCPeerConnection(config)
@@ -69,18 +65,32 @@ export const useWebRTC = ({
       socket.on("error", (error: string) => {
         setError(error)
       })
+      socket.on("disconnect", () => setGame(null))
     })
 
+    setSocket(socket)
     return () => {
       if (socket.connected) socket.close()
     }
-  }, [socket])
+  }, [])
 
   return {
-    createGame: (gameName: string, playerName: string) =>
-      socket.emit("createGame", { gameName, playerName }),
-    joinGame: (gameName: string, playerName: string) =>
-      socket.emit("joinGame", { gameName, playerName }),
-    game
+    createGame: (gameName: string, playerName: string) => {
+      const createGameOptions: CreateGameOptions = { gameName, playerName }
+      socket?.emit("createGame", createGameOptions)
+    },
+    joinGame: (gameName: string, playerName: string) => {
+      const joinGameOptions: JoinGameOptions = { gameName, playerName }
+      socket?.emit("joinGame", joinGameOptions)
+    },
+    makeGuess: (guess: string) => {
+      socket?.emit("makeGuess", guess)
+    },
+    game,
+    error,
+    leaveGame: () => {
+      socket?.emit("leaveGame")
+      setGame(null)
+    }
   }
 }
