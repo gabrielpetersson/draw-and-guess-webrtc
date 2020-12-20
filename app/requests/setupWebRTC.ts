@@ -20,7 +20,11 @@ export interface Game {
   participants: Record<string, User>
 }
 
-export const useWebRTC = () => {
+export const useWebRTC = ({
+  setError
+}: {
+  setError: (error: string) => void
+}) => {
   console.log("INIT")
   const peerConnections = React.useRef<Map<string, RTCPeerConnection>>(
     new Map()
@@ -28,7 +32,9 @@ export const useWebRTC = () => {
   const socket = React.useRef(io("ws://192.168.8.100:8000")).current
   const [game, setGame] = React.useState<Game | null>(null)
   React.useEffect(() => {
+    console.log("trying...")
     socket.on("connect", () => {
+      console.log("connected")
       socket.emit("broadcaster")
       socket.on("broadcaster", () => console.log("broadcaster"))
 
@@ -73,6 +79,10 @@ export const useWebRTC = () => {
 
       socket.on("leaveGame", () => {
         setGame(null)
+      })
+
+      socket.on("error", (error: string) => {
+        setError(error)
       })
     })
 

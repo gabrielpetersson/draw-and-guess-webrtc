@@ -1,10 +1,10 @@
 import React from "react"
-import { Dimensions } from "react-native"
+import { Dimensions, Text } from "react-native"
 
 import styled from "styled-components/native"
 import { MenuScreen } from "./MenuScreen"
 import { Spacer } from "./Spacer"
-import { ChatUserComponent } from "./ChatUserComponent"
+import { GameScreen as GameScreen } from "./GameScreen.tsx"
 import { useWebRTC } from "../requests/setupWebRTC"
 
 const GameRoot = styled.View`
@@ -71,17 +71,20 @@ const GameRoot = styled.View`
 //   peer.on("ping", data => console.log("GOT: ", data))
 //   return { sendPing }
 // }
-export const GameScreen = () => {
+export const MainScreen = () => {
   // const { sendPing } =
-  const { game, createGame, joinGame } = useWebRTC()
+  const [error, setError] = React.useState("")
+  const { game, createGame, joinGame } = useWebRTC({ setError })
+
   // sendPing()
   const [msg, setMsg] = React.useState("")
-
+  console.log("game", game)
   return (
     <GameRoot>
+      {error ? <Text style={{ color: "red" }}>{error}</Text> : null}
       {/* <ChatUserComponent msg={msg} username={["Fatih", "Gabriel", "PETAR"]} /> */}
       {game ? (
-        <ChatUserComponent game={game} />
+        <GameScreen game={game} />
       ) : (
         <MenuScreen createGame={createGame} joinGame={joinGame} />
       )}

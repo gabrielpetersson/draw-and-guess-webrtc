@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar"
 import React from "react"
-import { GameScreen } from "./components/GameScreen"
+import { MainScreen } from "./components/MainScreen"
 
 export default () => {
-  return <GameScreen />
+  return <MainScreen />
 }

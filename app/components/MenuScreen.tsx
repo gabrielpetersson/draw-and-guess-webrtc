@@ -32,8 +32,8 @@ export const MenuScreen = ({
   createGame,
   joinGame
 }: {
-  createGame: (gameName: string) => void
-  joinGame: (gameName: string) => void
+  createGame: (gameName: string, playerName: string) => void
+  joinGame: (gameName: string, playerName: string) => void
 }) => {
   const [
     startGameType,
