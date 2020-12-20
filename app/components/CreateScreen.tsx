@@ -1,5 +1,6 @@
 import React from "react"
 import styled from "styled-components/native"
+import { StartGameTypes } from "./MenuScreen"
 
 const FirstScreenRoot = styled.View`
   display: flex;
@@ -16,6 +17,10 @@ const JoinButton = styled.Button`
   display: flex;
   background-color: pink;
 `
+const GoBackButton = styled.Button`
+  display: flex;
+  background-color: red;
+`
 const CreateButton = styled.Button`
   display: flex;
   color: #f194ff;
@@ -26,35 +31,54 @@ const InputFıelds = styled.TextInput`
   border-radius: 0.2px;
   padding: 5px;
 `
+
 interface CreateScreenProps {
-  currentscreen: void
+  createGame: (gameName: string, playerName: string) => void
+  joinGame: (gameName: string, playerName: string) => void
+  startGameType: StartGameTypes
+  goBack: () => void
 }
 
-type Props = CreateScreenProps
-export const CreateScreen: React.FC<Props> = props => {
-  const [userName, setUserName] = React.useState("")
-  const [roomName, setRoomName] = React.useState("")
-  const [currentScreen, setCurrentScreen] = React.useState<number>(0)
-
+export const JoinGameScreen = ({
+  createGame,
+  joinGame,
+  startGameType,
+  goBack
+}: CreateScreenProps) => {
+  const [playerName, setUserName] = React.useState("")
+  const [gameName, setRoomName] = React.useState("")
   return (
     <>
       <InputFıelds
-        onChangeText={text => setUserName(text)}
-        placeholder="username"
-        value={userName}
+        onChangeText={text => text.length < 10 && setUserName(text)}
+        placeholder="Your name"
+        value={playerName}
       ></InputFıelds>
       <InputFıelds
-        placeholder="roomname"
-        onChangeText={text => setRoomName(text)}
-        value={roomName}
+        placeholder="Game name"
+        onChangeText={text =>
+          text.length < 10 && setRoomName(text.toLowerCase().replace(" ", ""))
+        }
+        value={gameName}
       ></InputFıelds>
       <JoinButton
-        title="Join Room"
-        disabled={!userName || !roomName}
+        title={
+          startGameType === StartGameTypes.join ? "Join room" : "Create room"
+        }
+        disabled={!playerName || !gameName}
         onPress={() => {
-          props.currentscreen(1, userName, roomName)
+          if (startGameType === StartGameTypes.join)
+            joinGame(gameName, playerName)
+          else if (startGameType === StartGameTypes.create)
+            createGame(gameName, playerName)
         }}
       ></JoinButton>
+      <GoBackButton
+        title={"Go back"}
+        onPress={() => {
+          goBack()
+        }}
+      ></GoBackButton>
     </>
   )
 }

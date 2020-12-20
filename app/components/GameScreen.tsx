@@ -2,7 +2,7 @@ import React from "react"
 import { Dimensions } from "react-native"
 
 import styled from "styled-components/native"
-import { MenuScreen } from "./FirstScreen"
+import { MenuScreen } from "./MenuScreen"
 import { Spacer } from "./Spacer"
 import { ChatUserComponent } from "./ChatUserComponent"
 import { useWebRTC } from "../requests/setupWebRTC"
@@ -76,28 +76,16 @@ export const GameScreen = () => {
   const { game, createGame, joinGame } = useWebRTC()
   // sendPing()
   const [msg, setMsg] = React.useState("")
-  const [username, setUsername] = React.useState("")
-  const [roomName, setRoomName] = React.useState("")
-  const [currentScreen, setCurrentScreen] = React.useState(0)
-  const changecurrentscreen = (number, username, roomname) => {
-    setCurrentScreen(number)
-    setUsername(username)
-    setRoomName(roomName)
-  }
+
   return (
     <GameRoot>
       {/* <ChatUserComponent msg={msg} username={["Fatih", "Gabriel", "PETAR"]} /> */}
-      <FirstScreen createGame={createGame} joinGame={joinGame} />
-      {currentScreen === 0 && (
-        <MenuScreen currentscreen={changecurrentscreen} />
+      {game ? (
+        <ChatUserComponent game={game} />
+      ) : (
+        <MenuScreen createGame={createGame} joinGame={joinGame} />
       )}
-      {currentScreen === 1 && (
-        <ChatUserComponent
-          username={[username]}
-          roomname={roomName}
-          msg="hello"
-        />
-      )}
+
       {/* <ChatUserComponent
         changecurrentscreen={changecurrentscreen}
         msg={msg}

@@ -1,8 +1,8 @@
 import React from "react"
 import styled from "styled-components/native"
 import { JoinScreen } from "./JoinScreen"
-import { CreateScreen } from "./CreateScreen"
-const FirstScreenRoot = styled.View`
+import { JoinGameScreen } from "./CreateScreen"
+const MenuRoot = styled.View`
   display: flex;
   flex: 1;
   background-color: #ffffff;
@@ -26,12 +26,11 @@ const CreateButton = styled.Button`
   color: #f194ff;
   background-color: #f194ff;
 `
-interface MenuScreenProps {
-  currentscreen: void
+
+export enum StartGameTypes {
+  join = "join",
+  create = "create"
 }
-
-type Props = MenuScreenProps
-
 export const MenuScreen = ({
   createGame,
   joinGame
@@ -39,34 +38,34 @@ export const MenuScreen = ({
   createGame: (gameName: string) => void
   joinGame: (gameName: string) => void
 }) => {
-  const [currentScreen, setCurrentScreen] = React.useState<number>(0)
+  const [
+    startGameType,
+    setStartGameType
+  ] = React.useState<StartGameTypes | null>(null)
 
   return (
-    <FirstScreenRoot>
+    <MenuRoot>
       <ButtonContainer>
-        {currentScreen == 1 && (
-          <>
-            <JoinScreen currentscreen={props.currentscreen}></JoinScreen>
-          </>
-        )}
-        {currentScreen == 2 && (
-          <>
-            <CreateScreen currentscreen={props.currentscreen}></CreateScreen>
-          </>
-        )}
-        {currentScreen == 0 && (
+        {startGameType ? (
+          <JoinGameScreen
+            createGame={createGame}
+            joinGame={joinGame}
+            startGameType={startGameType}
+            goBack={() => setStartGameType(null)}
+          ></JoinGameScreen>
+        ) : (
           <>
             <JoinButton
-              onPress={() => setCurrentScreen(1)}
+              onPress={() => setStartGameType(StartGameTypes.join)}
               title="Join"
             ></JoinButton>
             <CreateButton
-              onPress={() => setCurrentScreen(2)}
+              onPress={() => setStartGameType(StartGameTypes.create)}
               title="Create"
             ></CreateButton>
           </>
         )}
       </ButtonContainer>
-    </FirstScreenRoot>
+    </MenuRoot>
   )
 }

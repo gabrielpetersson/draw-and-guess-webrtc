@@ -1,6 +1,7 @@
 import React from "react"
 import { SafeAreaView, Text } from "react-native"
 import styled from "styled-components/native"
+import { Game } from "../requests/setupWebRTC"
 import { ChatMessage } from "./ChatMessage"
 
 const ChatRoot = styled.View`
@@ -55,13 +56,10 @@ const GuessButton = styled.Button`
 `
 
 interface ChatUserComponentProps {
-  username: string[]
-  msg: string
-  roomname: string
+  game: Game
 }
 
-type Props = ChatUserComponentProps
-export const ChatUserComponent: React.FC<Props> = props => {
+export const ChatUserComponent = ({ game }: ChatUserComponentProps) => {
   const [activemsg, setActivemsg] = React.useState("")
   const [currentmsg, setCurrentMsg] = React.useState("")
   const handleSendMessage = () => {
@@ -86,11 +84,11 @@ export const ChatUserComponent: React.FC<Props> = props => {
         {/* <ChatMessage username={"fatih"} msg={currentmsg}></ChatMessage> */}
         {/* <Text style={{ color: "black" }}>{props.roomname}</Text> */}
         <ChatBox>
-          {props.username.map(user => {
+          {Object.entries(game.participants).map(([userId, user]) => {
             return (
               <ChatContainer>
                 <ChatContainerLeft>
-                  <ChatText>{user}</ChatText>
+                  <ChatText>{user.name}</ChatText>
                 </ChatContainerLeft>
               </ChatContainer>
             )

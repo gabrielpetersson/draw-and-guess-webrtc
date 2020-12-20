@@ -9,12 +9,12 @@ import { io } from "socket.io-client/build/index"
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
 // const pc = new RTCPeerConnection(configuration)
 
-interface User {
+export interface User {
   id: string
   name?: string
   points: number
 }
-interface Game {
+export interface Game {
   owner: string
   currentTurnIndex?: number
   participants: Record<string, User>
@@ -83,7 +83,7 @@ export const useWebRTC = () => {
 
   return {
     createGame: (roomName: string) => socket.emit("createGame", { roomName }),
-    joinGame: (roomName: string) => socket.emit("createGame", { roomName }),
+    joinGame: (roomName: string) => socket.emit("joinGame", { roomName }),
     game
   }
 }
