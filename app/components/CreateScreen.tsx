@@ -1,6 +1,6 @@
 import React from "react"
 import styled from "styled-components/native"
-import { StartGameTypes } from "./MenuScreen"
+import { StartGameTypes } from "../types/start-game"
 
 const FirstScreenRoot = styled.View`
   display: flex;

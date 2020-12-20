@@ -2,6 +2,7 @@ import React from "react"
 import styled from "styled-components/native"
 import { JoinScreen } from "./JoinScreen"
 import { JoinGameScreen } from "./CreateScreen"
+import { StartGameTypes } from "../types/start-game"
 const MenuRoot = styled.View`
   display: flex;
   flex: 1;
@@ -27,10 +28,6 @@ const CreateButton = styled.Button`
   background-color: #f194ff;
 `
 
-export enum StartGameTypes {
-  join = "join",
-  create = "create"
-}
 export const MenuScreen = ({
   createGame,
   joinGame

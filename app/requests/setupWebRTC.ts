@@ -82,8 +82,10 @@ export const useWebRTC = () => {
   }, [socket])
 
   return {
-    createGame: (roomName: string) => socket.emit("createGame", { roomName }),
-    joinGame: (roomName: string) => socket.emit("joinGame", { roomName }),
+    createGame: (gameName: string, playerName: string) =>
+      socket.emit("createGame", { gameName, playerName }),
+    joinGame: (gameName: string, playerName: string) =>
+      socket.emit("joinGame", { gameName, playerName }),
     game
   }
 }
