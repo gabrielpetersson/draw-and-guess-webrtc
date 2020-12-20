@@ -21,9 +21,15 @@ const ErrorText = styled.Text`
 `
 
 export const MainScreen = () => {
-  // const [error, setError] = React.useState("")
-  const { game, createGame, joinGame, makeGuess, leaveGame } = useWebRTC()
-  const error = "error"
+  const {
+    game,
+    createGame,
+    joinGame,
+    makeGuess,
+    leaveGame,
+    error
+  } = useWebRTC()
+
   return (
     <GameRoot>
       {error ? <ErrorText style={{ color: "red" }}>{error}</ErrorText> : null}

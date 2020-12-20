@@ -36,6 +36,7 @@ let userToGame: Record<string, string> = {}
 
 console.log("LOG")
 io.on("connection", (socket: SocketIO.Socket) => {
+  // ----------------- WEBRTC STARTS -----------------
   console.log("connection", socket.id)
   // socket.on("broadcaster", () => {
   //   console.log("BROADSTER", socket.id)
@@ -45,10 +46,10 @@ io.on("connection", (socket: SocketIO.Socket) => {
   socket.on("watcher", () => {
     socket.to(broadcaster).emit("watcher", socket.id)
   })
-  socket.on("disconnect", () => {
-    console.log("DISCONNEDRED", socket.id)
-    socket.to(broadcaster).emit("disconnectPeer", socket.id)
-  })
+  // socket.on("disconnect", () => {
+  //   console.log("DISCONNEDRED", socket.id)
+  //   socket.to(broadcaster).emit("disconnectPeer", socket.id)
+  // })
   socket.on("offer", (id: string, message: string) => {
     socket.to(id).emit("offer", socket.id, message)
   })
@@ -61,17 +62,31 @@ io.on("connection", (socket: SocketIO.Socket) => {
   socket.on("comment", (id: string, message: string) => {
     socket.to(id).emit("comment", socket.id, message)
   })
+  // ----------------- WEBRTC ENDS ------------------
   const checkGameExist = (gameName: string) => {
     if (!games[gameName]) {
       console.log("NO GAME", gameName)
-      socket.emit("error", "No game for guess")
+      socket.emit("error", "No game found")
       return false
     }
     return true
   }
   const emitGame = (gameName: string) => {
     if (!checkGameExist(gameName)) return
-    io.sockets.emit("game", games[gameName])
+    io.to(gameName).emit("game", games[gameName])
+  }
+  const removeUser = () => {
+    const gameName = userToGame[socket.id]
+    if (checkGameExist(gameName)) delete games[gameName].participants[socket.id]
+    delete userToGame[socket.id]
+  }
+  const disconnectUser = () => {
+    console.log("LEAAFFFFFFE")
+    const gameName = userToGame[socket.id]
+    socket.leave(gameName)
+    if (!checkGameExist(gameName)) return
+    removeUser()
+    emitGame(gameName)
   }
   socket.on("makeGuess", (guess: string) => {
     const gameName = userToGame[socket.id]
@@ -83,35 +98,33 @@ io.on("connection", (socket: SocketIO.Socket) => {
     console.log("make guess", guess)
     emitGame(gameName)
   })
-  socket.on("leaveGame", () => {
-    const gameName = userToGame[socket.id]
-    if (checkGameExist(gameName)) delete games[gameName].participants[socket.id]
-    delete userToGame[socket.id]
-    emitGame(gameName)
-  })
-  socket.on("createGame", (createGameOpts: CreateGameOptions) => {
-    // socket.join(createGameOpts.gameName)
-    userToGame[socket.id] = createGameOpts.gameName
-    games[createGameOpts.gameName] = {
+  socket.on("leaveGame", disconnectUser)
+  socket.on("disconnect", disconnectUser)
+  socket.on("createGame", (opts: CreateGameOptions) => {
+    socket.join(opts.gameName)
+    userToGame[socket.id] = opts.gameName
+    games[opts.gameName] = {
       owner: socket.id,
+      name: opts.gameName,
       participants: {
-        [socket.id]: createUser(socket.id, createGameOpts.playerName)
+        [socket.id]: createUser(socket.id, opts.playerName)
       }
     }
-    socket.join(createGameOpts.gameName)
-    console.log("create room", games[createGameOpts.gameName])
-    emitGame(createGameOpts.gameName)
+    socket.join(opts.gameName)
+    console.log("create room", games[opts.gameName])
+    emitGame(opts.gameName)
   })
-  socket.on("joinGame", (joinGameOpts: JoinGameOptions) => {
-    userToGame[socket.id] = joinGameOpts.gameName
-    if (!checkGameExist(joinGameOpts.gameName)) return
-    games[joinGameOpts.gameName].participants[socket.id] = createUser(
+  socket.on("joinGame", (opts: JoinGameOptions) => {
+    socket.join(opts.gameName)
+    userToGame[socket.id] = opts.gameName
+    if (!checkGameExist(opts.gameName)) return
+    games[opts.gameName].participants[socket.id] = createUser(
       socket.id,
-      joinGameOpts.playerName
+      opts.playerName
     )
-    socket.join(joinGameOpts.gameName)
-    console.log("joined room", games[joinGameOpts.gameName])
-    emitGame(joinGameOpts.gameName)
+    socket.join(opts.gameName)
+    console.log("joined room", games[opts.gameName])
+    emitGame(opts.gameName)
   })
 
   socket.emit("leaveGame") // for server restarts

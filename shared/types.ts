@@ -12,6 +12,7 @@ export interface User {
 
 export interface Game {
   owner: string
+  name: string
   currentTurnIndex?: number
   participants: Record<string, User>
 }

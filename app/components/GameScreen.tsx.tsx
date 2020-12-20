@@ -10,6 +10,7 @@ import {
 } from "react-native"
 import styled from "styled-components/native"
 import { Game } from "../../shared"
+import { Spacer } from "./Spacer"
 
 const GameRoot = styled.View`
   flex-direction: column;
@@ -70,7 +71,28 @@ const LeaveText = styled.Text`
   font-size: 16px;
   text-transform: uppercase;
 `
-
+const GameCanvas = styled.View`
+  width: 100%;
+  height: 100px;
+`
+const GameHeader = styled.View`
+  position: absolute;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border-bottom-color: gray;
+  border-bottom-width: 1px;
+  background-color: #f4f4f4;
+  top: 20px;
+  left: 0;
+  width: 100%;
+  height: 56px;
+`
+const GameName = styled.Text`
+  color: #15c573;
+  font-size: 18px;
+  font-weight: 700;
+`
 interface ChatUserComponentProps {
   game: Game
   makeGuess?: (guess: string) => void
@@ -96,6 +118,12 @@ export const GameScreen = ({
   return (
     // <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={-100}>
     <GameRoot>
+      <GameHeader>
+        <Text>Room name:</Text>
+        <Spacer width={10} />
+        <GameName>{game.name}</GameName>
+      </GameHeader>
+      <GameCanvas />
       <Players>
         {Object.entries(game.participants).map(([userId, player]) => {
           return (
