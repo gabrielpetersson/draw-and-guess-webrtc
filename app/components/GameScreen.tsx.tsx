@@ -6,8 +6,8 @@ import { ChatMessage } from "./ChatMessage"
 
 const GameRoot = styled.View`
   flex-direction: column;
-  width: ${Dimensions.get("window").width};
-  height: ${Dimensions.get("window").height};
+  width: ${Dimensions.get("window").width}px;
+  height: ${Dimensions.get("window").height}px;
   align-self: flex-end;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
