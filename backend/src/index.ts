@@ -11,6 +11,7 @@ import {
   User
 } from "../../shared"
 
+const words = ["tree", "fotball", "potato", "table"]
 const app = express()
 const server = new http.Server(app)
 const io = new SocketIO.Server(server)
@@ -23,18 +24,28 @@ app.get("/", (req, res) => {
 io.sockets.on("error", e => console.log(e))
 server.listen(port, () => console.log(`Server is running on port ${port}`))
 
-const createUser = (id: string, name?: string): User => ({
+const createUser = (id: string, name: string): User => ({
   id,
-  name: name ?? Math.floor(Math.random() * 1000).toString(),
+  name,
   points: 0,
-  guesses: []
+  guesses: [],
+  isReady: false
 })
-
+const createTurn = (game: Game) => ({
+  painterPlayerId: Object.values(game.participants)[
+    Math.floor(Math.random() * Object.values(game.participants).length)
+  ].id,
+  isPainterReady: false,
+  painterWord: words[Math.floor(Math.random() * words.length)],
+  correctGuessPlayerIds: []
+})
+const checkEveryoneReady = (game: Game) => {
+  return Object.values(game.participants).every(p => p.isReady)
+}
 let broadcaster = ""
 let games: Games = {}
 let userToGame: Record<string, string> = {}
 
-console.log("LOG")
 io.on("connection", (socket: SocketIO.Socket) => {
   // ----------------- WEBRTC STARTS -----------------
   console.log("connection", socket.id)
@@ -63,43 +74,78 @@ io.on("connection", (socket: SocketIO.Socket) => {
     socket.to(id).emit("comment", socket.id, message)
   })
   // ----------------- WEBRTC ENDS ------------------
-  const checkGameExist = (gameName: string) => {
+  const sendError = (error: string) => socket.emit("error", error)
+  const checkGameExist = () => {
+    const gameName = getGameName()
     if (!games[gameName]) {
-      console.log("NO GAME", gameName)
-      socket.emit("error", "No game found")
+      sendError("No game found")
       return false
     }
     return true
   }
-  const emitGame = (gameName: string) => {
-    if (!checkGameExist(gameName)) return
-    io.to(gameName).emit("game", games[gameName])
+  const checkTurnExist = () => {
+    return !!(checkGameExist && getGame().currentTurn)
+  }
+  const emitToRoom = <T>(channel: string, data: T) =>
+    io.to(getGameName()).emit(channel, data)
+  const emitGame = () => {
+    if (!checkGameExist()) return
+    emitToRoom("game", getGame())
   }
   const removeUser = () => {
-    const gameName = userToGame[socket.id]
-    if (checkGameExist(gameName)) delete games[gameName].participants[socket.id]
+    if (checkGameExist()) delete getGame().participants[socket.id]
     delete userToGame[socket.id]
   }
   const disconnectUser = () => {
-    console.log("LEAAFFFFFFE")
-    const gameName = userToGame[socket.id]
+    const gameName = getGameName()
     socket.leave(gameName)
-    if (!checkGameExist(gameName)) return
+    if (!checkGameExist()) return
     removeUser()
-    emitGame(gameName)
+    emitGame()
+  }
+  const getGameName = () => userToGame[socket.id]
+  const getGame = () => games[getGameName()]
+  const getPlayer = () => getGame()?.participants[socket.id]
+  const isCorrectGuess = (guess: string) => {
+    const game = getGame()
+    if (guess && game.currentTurn?.correctGuessPlayerIds.includes(socket.id))
+      return
+    return guess === game.currentTurn?.painterWord
   }
   socket.on("makeGuess", (guess: string) => {
-    const gameName = userToGame[socket.id]
-    if (!checkGameExist(gameName)) return
-    games[gameName].participants[socket.id].guesses.push({
+    const game = getGame()
+    if (!checkTurnExist()) return
+    if (isCorrectGuess(guess)) {
+      const player = getPlayer()
+      player.points += 1
+      game.currentTurn?.correctGuessPlayerIds.push(socket.id)
+      emitGame()
+      return
+    }
+    game.participants[socket.id].guesses.push({
       id: uuid(),
       text: guess
     })
-    console.log("make guess", guess)
-    emitGame(gameName)
+    emitGame()
   })
   socket.on("leaveGame", disconnectUser)
   socket.on("disconnect", disconnectUser)
+  socket.on("markAsReady", () => {
+    const game = getGame()
+    getPlayer().isReady = true
+    const shouldGameStart = checkEveryoneReady(game)
+    if (shouldGameStart) game.currentTurn = createTurn(game)
+    emitGame()
+  })
+  socket.on("markPainterAsReady", () => {
+    const game = getGame()
+    if (!game.currentTurn) {
+      sendError("No turn found")
+      return
+    }
+    game.currentTurn.isPainterReady = true
+    emitGame()
+  })
   socket.on("createGame", (opts: CreateGameOptions) => {
     socket.join(opts.gameName)
     userToGame[socket.id] = opts.gameName
@@ -111,21 +157,25 @@ io.on("connection", (socket: SocketIO.Socket) => {
       }
     }
     socket.join(opts.gameName)
-    console.log("create room", games[opts.gameName])
-    emitGame(opts.gameName)
+    socket.emit("playerId", socket.id)
+    emitGame()
   })
   socket.on("joinGame", (opts: JoinGameOptions) => {
     socket.join(opts.gameName)
     userToGame[socket.id] = opts.gameName
-    if (!checkGameExist(opts.gameName)) return
+    if (!checkGameExist()) return
     games[opts.gameName].participants[socket.id] = createUser(
       socket.id,
       opts.playerName
     )
     socket.join(opts.gameName)
-    console.log("joined room", games[opts.gameName])
-    emitGame(opts.gameName)
+    socket.emit("playerId", socket.id)
+    emitGame()
   })
 
   socket.emit("leaveGame") // for server restarts
+  socket.onAny(e => {
+    console.info("[new event]", e)
+    console.info("[current game]", getGame())
+  })
 })
