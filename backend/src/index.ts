@@ -61,8 +61,8 @@ io.on("connection", (socket: SocketIO.Socket) => {
   //   console.log("DISCONNEDRED", socket.id)
   //   socket.to(broadcaster).emit("disconnectPeer", socket.id)
   // })
-  socket.on("offer", (id: string, message: string) => {
-    socket.to(id).emit("offer", socket.id, message)
+  socket.on("webrtcOffer", (id: string, message: string) => {
+    socket.to(id).emit("webrtcOffer", socket.id, message)
   })
   socket.on("answer", (id: string, message: string) => {
     socket.to(id).emit("answer", socket.id, message)
@@ -78,7 +78,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
   const checkGameExist = () => {
     const gameName = getGameName()
     if (!games[gameName]) {
-      sendError("No game found")
+      // sendError("No game found")
       return false
     }
     return true
@@ -96,11 +96,17 @@ io.on("connection", (socket: SocketIO.Socket) => {
     if (checkGameExist()) delete getGame().participants[socket.id]
     delete userToGame[socket.id]
   }
+  const removeGame = () => {
+    if (!checkGameExist()) return
+    delete games[getGameName()]
+  }
   const disconnectUser = () => {
+    const game = getGame()
     const gameName = getGameName()
     socket.leave(gameName)
     if (!checkGameExist()) return
     removeUser()
+    if (!game.participants.length) removeGame()
     emitGame()
   }
   const getGameName = () => userToGame[socket.id]
@@ -170,12 +176,13 @@ io.on("connection", (socket: SocketIO.Socket) => {
     )
     socket.join(opts.gameName)
     socket.emit("playerId", socket.id)
+    socket.broadcast.emit("webrtcWatcher", socket.id)
     emitGame()
   })
 
   socket.emit("leaveGame") // for server restarts
   socket.onAny(e => {
     console.info("[new event]", e)
-    console.info("[current game]", getGame())
+    // console.info("[current game]", getGame())
   })
 })
