@@ -5,16 +5,24 @@ export interface Guess {
 
 export interface User {
   id: string
-  name?: string
+  name: string
   points: number
   guesses: Guess[]
+  isReady: boolean
+}
+
+export interface GameTurn {
+  painterPlayerId: string
+  isPainterReady: boolean
+  painterWord: string
+  correctGuessPlayerIds: string[]
 }
 
 export interface Game {
   owner: string
   name: string
-  currentTurnIndex?: number
   participants: Record<string, User>
+  currentTurn?: GameTurn
 }
 
 export interface CreateGameOptions {

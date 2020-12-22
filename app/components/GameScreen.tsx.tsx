@@ -10,10 +10,11 @@ import {
 } from "react-native"
 import styled from "styled-components/native"
 import { Game } from "../../shared"
+import { GameContent } from "./GameContent"
 import { Spacer } from "./Spacer"
 
 const GameRoot = styled.View`
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
   height: 100%;
   justify-content: flex-end;
@@ -26,15 +27,11 @@ const Players = styled.View`
   height: 40px;
   justify-content: space-evenly;
   align-items: center;
-  border-top-color: gray;
-  border-top-width: 1px;
-  background-color: #f4f4f4;
 `
 const PlayerContainer = styled.View`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #15c573;
   border-radius: 4px;
   height: 60%;
   width: 20%;
@@ -52,13 +49,13 @@ const Message = styled.Text`
   width: 100%;
   color: black;
 `
-const BottomContainer = styled.View`
+const GuessingContainer = styled.View`
   width: 100%;
-  border-top-width: 1px;
-  border-top-color: black;
   height: 64px;
   padding: 15px 20px;
   flex-direction: row;
+  border-top-color: black;
+  border-top-width: 1px;
 `
 const LeaveButton = styled.View`
   background-color: red;
@@ -73,11 +70,6 @@ const LeaveText = styled.Text`
   color: white;
   font-size: 16px;
   text-transform: uppercase;
-`
-const GameCanvas = styled.View`
-  width: ${Dimensions.get("screen").width}px;
-  height: ${Dimensions.get("screen").width}px;
-  background-color: red;
 `
 const GameHeader = styled.View`
   position: absolute;
@@ -97,15 +89,31 @@ const GameName = styled.Text`
   font-size: 18px;
   font-weight: 700;
 `
+
+const GameFooter = styled.View`
+  position: absolute;
+  justify-content: flex-end;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10000000000000;
+`
+
 interface ChatUserComponentProps {
   game: Game
-  makeGuess?: (guess: string) => void
+  makeGuess: (guess: string) => void
   leaveGame: () => void
+  markAsReady: () => void
+  localPlayerId: string
+  markPainterAsReady: () => void
 }
 export const GameScreen = ({
   game,
   makeGuess,
-  leaveGame
+  leaveGame,
+  markAsReady,
+  localPlayerId,
+  markPainterAsReady
 }: ChatUserComponentProps) => {
   const [guess, setGuess] = React.useState("")
   const [messageFades, setMessageFades] = React.useState<
@@ -127,68 +135,77 @@ export const GameScreen = ({
         <Spacer width={10} />
         <GameName>{game.name}</GameName>
       </GameHeader>
-      <GameCanvas />
-      <Players>
-        {Object.entries(game.participants).map(([userId, player]) => {
-          return (
-            <PlayerContainer key={userId}>
-              {[...player.guesses].reverse().map((guess, i) => {
-                const isAnimationExisting = !!messageFades[guess.id]
-                let animation = isAnimationExisting
-                  ? messageFades[guess.id]
-                  : new Animated.Value(1)
-                if (!isAnimationExisting) {
-                  fadeOut(animation)
-                  setMessageFades(p => ({
-                    [guess.id]: animation,
-                    ...p
-                  }))
-                }
-                return (
-                  <Animated.View
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: i * -24 - 30,
-                      width: "100%",
-                      opacity: animation
-                    }}
-                    key={guess.id}
-                  >
-                    <Message>{guess.text}</Message>
-                  </Animated.View>
-                )
-              })}
-              <PlayerName>{player.name ?? ""}</PlayerName>
-            </PlayerContainer>
-          )
-        })}
-      </Players>
-
-      <BottomContainer>
-        <TextInput
-          placeholderTextColor="black"
-          placeholder="Guess.."
-          value={guess}
-          onChangeText={(text: string) =>
-            text.length < 14 && setGuess(text.toLowerCase().replace(" ", ""))
-          }
-          blurOnSubmit={false}
-          onSubmitEditing={() => {
-            if (!guess) return
-            makeGuess?.(guess)
-            setGuess("")
-          }}
-          style={{
-            flex: 4
-          }}
-        />
-        <TouchableWithoutFeedback onPress={leaveGame}>
-          <LeaveButton>
-            <LeaveText>Leave</LeaveText>
-          </LeaveButton>
-        </TouchableWithoutFeedback>
-      </BottomContainer>
+      <GameContent
+        markAsReady={markAsReady}
+        markPainterAsReady={markPainterAsReady}
+        localPlayerId={localPlayerId}
+        game={game}
+      />
+      <GameFooter>
+        <Players>
+          {Object.entries(game.participants).map(([userId, player]) => {
+            return (
+              <PlayerContainer
+                key={userId}
+                style={{ backgroundColor: player.isReady ? "#15c573" : "red" }}
+              >
+                {[...player.guesses].reverse().map((guess, i) => {
+                  const isAnimationExisting = !!messageFades[guess.id]
+                  let animation = isAnimationExisting
+                    ? messageFades[guess.id]
+                    : new Animated.Value(1)
+                  if (!isAnimationExisting) {
+                    fadeOut(animation)
+                    setMessageFades(p => ({
+                      [guess.id]: animation,
+                      ...p
+                    }))
+                  }
+                  return (
+                    <Animated.View
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: i * -24 - 30,
+                        width: "100%",
+                        opacity: animation
+                      }}
+                      key={guess.id}
+                    >
+                      <Message>{guess.text}</Message>
+                    </Animated.View>
+                  )
+                })}
+                <PlayerName>{`${player.name}: ${player.points}`}</PlayerName>
+              </PlayerContainer>
+            )
+          })}
+        </Players>
+        <GuessingContainer>
+          <TextInput
+            placeholderTextColor="black"
+            placeholder="Guess.."
+            value={guess}
+            onChangeText={(text: string) =>
+              text.length < 14 && setGuess(text.toLowerCase().replace(" ", ""))
+            }
+            blurOnSubmit={false}
+            onSubmitEditing={() => {
+              if (!guess) return
+              makeGuess(guess)
+              setGuess("")
+            }}
+            style={{
+              flex: 4
+            }}
+          />
+          <TouchableWithoutFeedback onPress={leaveGame}>
+            <LeaveButton>
+              <LeaveText>Leave</LeaveText>
+            </LeaveButton>
+          </TouchableWithoutFeedback>
+        </GuessingContainer>
+      </GameFooter>
     </GameRoot>
     // </KeyboardAvoidingView>
   )

@@ -1,6 +1,6 @@
 import React from "react"
 import styled from "styled-components/native"
-import { JoinGameScreen } from "./CreateScreen"
+import { JoinGameScreen } from "./JoinGameScreen"
 import { StartGameTypes } from "../types/start-game"
 const MenuRoot = styled.View`
   display: flex;

@@ -27,14 +27,24 @@ export const MainScreen = () => {
     joinGame,
     makeGuess,
     leaveGame,
-    error
+    error,
+    localPlayerId,
+    markAsReady,
+    markPainterAsReady
   } = useWebRTC()
 
   return (
     <GameRoot>
       {error ? <ErrorText style={{ color: "red" }}>{error}</ErrorText> : null}
       {game ? (
-        <GameScreen leaveGame={leaveGame} game={game} makeGuess={makeGuess} />
+        <GameScreen
+          markAsReady={markAsReady}
+          markPainterAsReady={markPainterAsReady}
+          localPlayerId={localPlayerId}
+          leaveGame={leaveGame}
+          game={game}
+          makeGuess={makeGuess}
+        />
       ) : (
         <MenuScreen createGame={createGame} joinGame={joinGame} />
       )}

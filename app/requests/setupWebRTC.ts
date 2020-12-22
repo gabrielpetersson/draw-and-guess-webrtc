@@ -7,6 +7,7 @@ const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
 
 export const useWebRTC = () => {
   const [error, setError] = React.useState("")
+  const [localPlayerId, setLocalPlayerId] = React.useState("")
   const peerConnections = React.useRef<Map<string, RTCPeerConnection>>(
     new Map()
   )
@@ -20,17 +21,17 @@ export const useWebRTC = () => {
       // socket.on("broadcaster", () => console.log("broadcaster"))
 
       socket.on("watcher", async (id: string) => {
-        // const connectionBuffer = new RTCPeerConnection(config)
-        // const dataChannel = connectionBuffer.createDataChannel("sendChannel")
-        // dataChannel.onopen = (d: any) => console.log(d)
-        // dataChannel.onclose = (d: any) => console.log(d)
-        // connectionBuffer.onicecandidate = ({ candidate }) => {
-        //   if (candidate) socket.emit("candidate", id, candidate)
-        // }
-        // const localDescription = await connectionBuffer.createOffer()
-        // await connectionBuffer.setLocalDescription(localDescription)
-        // socket.emit("offer", id, connectionBuffer.localDescription)
-        // peerConnections.current.set(id, connectionBuffer)
+        const connectionBuffer = new RTCPeerConnection(config)
+        const dataChannel = connectionBuffer.createDataChannel("sendChannel")
+        dataChannel.onopen = (d: any) => console.log(d)
+        dataChannel.onclose = (d: any) => console.log(d)
+        connectionBuffer.onicecandidate = ({ candidate }) => {
+          if (candidate) socket.emit("candidate", id, candidate)
+        }
+        const localDescription = await connectionBuffer.createOffer()
+        await connectionBuffer.setLocalDescription(localDescription)
+        socket.emit("offer", id, connectionBuffer.localDescription)
+        peerConnections.current.set(id, connectionBuffer)
       })
 
       socket.on("candidate", (id: string, candidate: any) => {
@@ -64,6 +65,7 @@ export const useWebRTC = () => {
         setError(error)
       })
       socket.on("disconnect", () => setGame(null))
+      socket.on("playerId", setLocalPlayerId)
     })
 
     setSocket(socket)
@@ -86,9 +88,16 @@ export const useWebRTC = () => {
     },
     game,
     error,
+    localPlayerId,
     leaveGame: () => {
       socket?.emit("leaveGame")
       setGame(null)
+    },
+    markAsReady: () => {
+      socket?.emit("markAsReady")
+    },
+    markPainterAsReady: () => {
+      socket?.emit("markPainterAsReady")
     }
   }
 }

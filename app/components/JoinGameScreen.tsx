@@ -45,19 +45,19 @@ export const JoinGameScreen = ({
   startGameType,
   goBack
 }: CreateScreenProps) => {
-  const [playerName, setUserName] = React.useState("")
-  const [gameName, setRoomName] = React.useState("")
+  const [playerName, setPlayerName] = React.useState("gab")
+  const [gameName, setGameName] = React.useState("gamename")
   return (
     <>
       <InputFıelds
-        onChangeText={text => text.length < 10 && setUserName(text)}
+        onChangeText={text => text.length < 10 && setPlayerName(text)}
         placeholder="Your name"
-        value={playerName}
+        defaultValue={playerName}
       ></InputFıelds>
       <InputFıelds
         placeholder="Game name"
         onChangeText={text =>
-          text.length < 10 && setRoomName(text.toLowerCase().replace(" ", ""))
+          text.length < 10 && setGameName(text.toLowerCase().replace(" ", ""))
         }
         value={gameName}
       ></InputFıelds>
