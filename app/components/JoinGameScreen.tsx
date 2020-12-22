@@ -1,18 +1,11 @@
 import React from "react"
 import styled from "styled-components/native"
-import { StartGameTypes } from "../types/start-game"
 
-const FirstScreenRoot = styled.View`
-  display: flex;
-  flex: 1;
-  background-color: #ffffff;
-  justify-content: center;
-  align-items: center;
-`
-const ButtonContainer = styled.View`
-  display: flex;
-  justify-content: space-between;
-`
+export enum StartGameTypes {
+  join = "join",
+  create = "create"
+}
+
 const JoinButton = styled.Button`
   display: flex;
   background-color: pink;
@@ -21,11 +14,7 @@ const GoBackButton = styled.Button`
   display: flex;
   background-color: red;
 `
-const CreateButton = styled.Button`
-  display: flex;
-  color: #f194ff;
-  background-color: #f194ff;
-`
+
 const InputFıelds = styled.TextInput`
   border: 1px;
   border-radius: 0.2px;

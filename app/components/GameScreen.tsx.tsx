@@ -1,9 +1,6 @@
 import React from "react"
 import {
   Animated,
-  Dimensions,
-  KeyboardAvoidingView,
-  SafeAreaView,
   Text,
   TextInput,
   TouchableWithoutFeedback
@@ -119,6 +116,7 @@ export const GameScreen = ({
   const [messageFades, setMessageFades] = React.useState<
     Record<string, Animated.Value>
   >({})
+
   const fadeOut = (anim: Animated.Value) => {
     Animated.timing(anim, {
       delay: 4000,
@@ -127,8 +125,8 @@ export const GameScreen = ({
       useNativeDriver: false
     }).start()
   }
+  console.log("GAME")
   return (
-    // <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={-100}>
     <GameRoot>
       <GameHeader>
         <Text>Room name:</Text>
@@ -207,6 +205,5 @@ export const GameScreen = ({
         </GuessingContainer>
       </GameFooter>
     </GameRoot>
-    // </KeyboardAvoidingView>
   )
 }

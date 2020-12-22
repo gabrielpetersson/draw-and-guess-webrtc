@@ -32,13 +32,17 @@ export const useWebRTC = () => {
         console.log("created localcon", localConnection)
         const dataChannel = localConnection.createDataChannel("sendChannel")
         console.log("DC", dataChannel)
-        dataChannel.onopen = (d: any) => console.log("OPEN", d)
+        dataChannel.onopen = (d: any) =>
+          console.log(
+            "OPEN DATACAHNNEL__________________________###########################################################################################################",
+            d
+          )
         dataChannel.onclose = (d: any) => console.log(d)
 
-        localConnection.onicecandidate = ({ candidate }) => {
-          console.log("GOT CANDIDATE2", candidate)
-          if (candidate) socket.emit("candidate", id, candidate)
-        }
+        // localConnection.onicecandidate = ({ candidate }) => {
+        //   console.log("GOT CANDIDATE2")
+        //   if (candidate) socket.emit("candidate", id, candidate)
+        // }
 
         const localDescription = await localConnection.createOffer()
         await localConnection.setLocalDescription(localDescription)
@@ -51,10 +55,10 @@ export const useWebRTC = () => {
         async (id: string, offer: RTCSessionDescriptionType) => {
           console.log("got offer", offer)
           const localConnection = new RTCPeerConnection(config)
-          localConnection.onicecandidate = ({ candidate }) => {
-            console.log("GOT CANDIDATE", candidate)
-            if (candidate) socket.emit("candidate", id, candidate)
-          }
+          // localConnection.onicecandidate = ({ candidate }) => {
+          //   console.log("GOT CANDIDATE", candidate)
+          //   if (candidate) socket.emit("candidate", id, candidate)
+          // }
 
           await localConnection.setRemoteDescription(offer)
           const localDescription = await localConnection.createAnswer()

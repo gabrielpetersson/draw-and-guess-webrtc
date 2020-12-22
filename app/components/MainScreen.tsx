@@ -3,7 +3,7 @@ import { Text } from "react-native"
 
 import styled from "styled-components/native"
 import { MenuScreen } from "./MenuScreen"
-import { GameScreen as GameScreen } from "./GameScreen.tsx"
+import { GameScreen } from "./GameScreen.tsx"
 import { useWebRTC } from "../requests/setupWebRTC"
 
 const GameRoot = styled.View`

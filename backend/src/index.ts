@@ -64,7 +64,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
   socket.on("webrtcOffer", (id: string, message: string) => {
     socket.to(id).emit("webrtcOffer", socket.id, message)
   })
-  socket.on("answer", (id: string, message: string) => {
+  socket.on("webrtcAnswer", (id: string, message: string) => {
     socket.to(id).emit("answer", socket.id, message)
   })
   socket.on("candidate", (id: string, message: string) => {
@@ -78,7 +78,6 @@ io.on("connection", (socket: SocketIO.Socket) => {
   const checkGameExist = () => {
     const gameName = getGameName()
     if (!games[gameName]) {
-      // sendError("No game found")
       return false
     }
     return true

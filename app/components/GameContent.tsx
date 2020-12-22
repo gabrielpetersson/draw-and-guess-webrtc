@@ -23,11 +23,6 @@ const ReadyButton = styled.View`
   align-items: center;
   border-radius: 4px;
 `
-// const GameCanvas = styled.View`
-//   width: 100%;
-//   height: 100%;
-//   background-color: red;
-// `
 
 const PaintText = styled.Text`
   color: white;

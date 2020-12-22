@@ -90,29 +90,6 @@ export const drawLinesToCanvas = ({
   })
   ctx.strokeStyle = "black"
   ctx.stroke()
-  // if (lines.length && ctx) {
-  //   lines.forEach(line => {
-  //     ctx.beginPath()
-  //     ctx.lineWidth = lineWidth
-  //     ctx.lineCap = "round"
-  //     ctx.lineJoin = "round"
-  //     line.forEach((point, i, points) => {
-  //       if (!i) ctx.moveTo(point.x, point.y)
-  //       else if (i < 3) ctx.lineTo(point.x, point.y)
-  //       else if (i % 2 !== 0)
-  //         ctx.bezierCurveTo(
-  //           points[i - 2].x,
-  //           points[i - 2].y,
-  //           points[i - 1].x,
-  //           points[i - 1].y,
-  //           point.x,
-  //           point.y
-  //         )
-  //     })
-  //     ctx.strokeStyle = "black"
-  //     ctx.stroke()
-  //   })
-  // }
 }
 
 export const GameCanvas = () => {

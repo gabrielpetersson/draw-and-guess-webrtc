@@ -17,7 +17,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gabrielpetersson.drawandguesswebrtc"
     },
     "android": {
       "adaptiveIcon": {
@@ -32,11 +33,12 @@
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.RECORD_AUDIO",
         "android.permission.SYSTEM_ALERT_WINDOW",
-        "android.permission.WAKE_LOCK" ]
+        "android.permission.WAKE_LOCK"
+      ],
+      "package": "com.gabrielpetersson.drawandguesswebrtc"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     }
   }
 }
-
