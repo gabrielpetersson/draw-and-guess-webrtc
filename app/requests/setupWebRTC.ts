@@ -1,8 +1,14 @@
 import React from "react"
-import { RTCPeerConnection, RTCIceCandidate } from "react-native-webrtc"
+import {
+  RTCPeerConnection,
+  RTCIceCandidate,
+  RTCSessionDescriptionType,
+  registerGlobals
+} from "react-native-webrtc"
 import { io, Socket } from "socket.io-client/build/index"
-import { CreateGameOptions, Game, JoinGameOptions, User } from "../../shared"
+import { CreateGameOptions, Game, JoinGameOptions } from "../../shared"
 
+registerGlobals()
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
 
 export const useWebRTC = () => {
@@ -20,31 +26,53 @@ export const useWebRTC = () => {
       // socket.emit("broadcaster")
       // socket.on("broadcaster", () => console.log("broadcaster"))
 
-      socket.on("watcher", async (id: string) => {
-        const connectionBuffer = new RTCPeerConnection(config)
-        const dataChannel = connectionBuffer.createDataChannel("sendChannel")
-        dataChannel.onopen = (d: any) => console.log(d)
+      socket.on("webrtcWatcher", async (id: string) => {
+        console.log("INITING LOCAL", id)
+        const localConnection = new RTCPeerConnection(config)
+        console.log("created localcon", localConnection)
+        const dataChannel = localConnection.createDataChannel("sendChannel")
+        console.log("DC", dataChannel)
+        dataChannel.onopen = (d: any) => console.log("OPEN", d)
         dataChannel.onclose = (d: any) => console.log(d)
-        connectionBuffer.onicecandidate = ({ candidate }) => {
+
+        localConnection.onicecandidate = ({ candidate }) => {
+          console.log("GOT CANDIDATE2", candidate)
           if (candidate) socket.emit("candidate", id, candidate)
         }
-        const localDescription = await connectionBuffer.createOffer()
-        await connectionBuffer.setLocalDescription(localDescription)
-        socket.emit("offer", id, connectionBuffer.localDescription)
-        peerConnections.current.set(id, connectionBuffer)
+
+        const localDescription = await localConnection.createOffer()
+        await localConnection.setLocalDescription(localDescription)
+        socket.emit("webrtcOffer", id, localConnection.localDescription)
+        peerConnections.current.set(id, localConnection)
       })
 
+      socket.on(
+        "webrtcOffer",
+        async (id: string, offer: RTCSessionDescriptionType) => {
+          console.log("got offer", offer)
+          const localConnection = new RTCPeerConnection(config)
+          localConnection.onicecandidate = ({ candidate }) => {
+            console.log("GOT CANDIDATE", candidate)
+            if (candidate) socket.emit("candidate", id, candidate)
+          }
+
+          await localConnection.setRemoteDescription(offer)
+          const localDescription = await localConnection.createAnswer()
+          socket.emit("webrtcAnswer", id, localDescription)
+        }
+      )
+
       socket.on("candidate", (id: string, candidate: any) => {
-        // const candidateBuffer = new RTCIceCandidate(candidate as any)
+        const candidateBuffer = new RTCIceCandidate(candidate as any)
         const connectionBuffer = peerConnections.current.get(id)
         if (!connectionBuffer) return
-        // connectionBuffer.addIceCandidate(candidateBuffer)
+        connectionBuffer.addIceCandidate(candidateBuffer)
       })
 
       socket.on("answer", (id: string, remoteOfferDescription: any) => {
-        const connectionBuffer = peerConnections.current.get(id)
-        if (!connectionBuffer) return
-        connectionBuffer.setRemoteDescription(remoteOfferDescription)
+        const localConnection = peerConnections.current.get(id)
+        if (!localConnection) return
+        localConnection.setRemoteDescription(remoteOfferDescription)
       })
 
       socket.on("disconnectPeer", (id: string) => {
@@ -62,10 +90,12 @@ export const useWebRTC = () => {
       })
 
       socket.on("error", (error: string) => {
+        console.log("GOT ERROR", error)
         setError(error)
       })
       socket.on("disconnect", () => setGame(null))
       socket.on("playerId", setLocalPlayerId)
+      socket.onAny(e => console.log("[event]", e))
     })
 
     setSocket(socket)

@@ -50,7 +50,7 @@ const createPanResponder = ({
     onPanResponderGrant: e => {
       createNewLine()
     },
-    onPanResponderMove: (e, gest) => {
+    onPanResponderMove: e => {
       addNewPoint({ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY })
     },
     onPanResponderRelease: (_, gest) => {
@@ -71,7 +71,6 @@ export const drawLinesToCanvas = ({
   const ctx = canvas.getContext("2d")
   if (!lines.length) return
   const endOfLine = lines[lines.length - 1].slice(-3)
-
   ctx.beginPath()
   ctx.lineWidth = lineWidth
   ctx.lineCap = "round"
@@ -131,14 +130,15 @@ export const GameCanvas = () => {
   React.useEffect(() => {
     if (!canvas) return
     drawLinesToCanvas({ canvas, lines })
-  }, [lines])
+  }, [lines, canvas])
+
   return (
     <Animated.View
       {...panResponder?.panHandlers}
       style={{
         backgroundColor: "yellow",
-        width: Dimensions.get("screen").width,
-        height: Dimensions.get("screen").width
+        width: Dimensions.get("window").width,
+        height: Dimensions.get("window").width
       }}
       // pointerEvents="none"
     >
@@ -148,15 +148,13 @@ export const GameCanvas = () => {
           height: "100%",
           backgroundColor: "blue"
         }}
-        width={Dimensions.get("screen").width}
-        height={Dimensions.get("screen").width}
-        // width={Dimensions.get("screen").width}
-        // height={Dimensions.get("screen").width}
+        width={Dimensions.get("window").width}
+        height={Dimensions.get("window").width}
         ref={(c: Canvas) => {
           if (!c || canvas) return
-          c.width = Dimensions.get("screen").width
-          c.height = Dimensions.get("screen").height
-          setCanvas(canvas)
+          c.width = Dimensions.get("window").width
+          c.height = Dimensions.get("window").height
+          setCanvas(c)
         }}
       />
     </Animated.View>
