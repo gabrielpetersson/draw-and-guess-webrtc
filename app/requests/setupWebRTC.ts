@@ -31,6 +31,11 @@ export const useWebRTC = () => {
         const localConnection = new RTCPeerConnection(config)
         console.log("created localcon", localConnection)
         const dataChannel = localConnection.createDataChannel("sendChannel")
+
+        localConnection.onicecandidate = ({ candidate }) => {
+          if (candidate) socket.emit("candidate", id, candidate)
+        }
+
         console.log("DC", dataChannel)
         dataChannel.onopen = (d: any) =>
           console.log(

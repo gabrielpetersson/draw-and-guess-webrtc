@@ -18,7 +18,7 @@ const io = new SocketIO.Server(server)
 const port = 8000
 
 app.get("/", (req, res) => {
-  res.send("l,onis luktar")
+  res.send("connectd")
 })
 
 io.sockets.on("error", e => console.log(e))
