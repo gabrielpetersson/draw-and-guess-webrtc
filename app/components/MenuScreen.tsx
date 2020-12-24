@@ -1,32 +1,55 @@
 import React from "react"
 import styled from "styled-components/native"
+import { Platform, Text, StyleSheet } from "react-native"
 import { JoinGameScreen, StartGameTypes } from "./JoinGameScreen"
+import mainbackground from "../static/background.jpg"
+import ImageResizeMode from "react-native/Libraries/Image/ImageResizeMode"
+import logo from "../static/pencil.png"
+import { TouchableOpacity } from "react-native-gesture-handler"
+
+export const MainBackground = styled.ImageBackground`
+  display: flex;
+  flex: 1;
+`
+
+export const LogoContainer = styled.View`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50%;
+`
+const LogoImage = styled.Image`
+  position: absolute;
+`
 
 const MenuRoot = styled.View`
   display: flex;
   flex: 1;
-  background-color: #ffffff;
   justify-content: center;
   align-items: center;
 `
-const ButtonContainer = styled.View`
+export const ButtonContainer = styled.View<{ bigger?: boolean }>`
   display: flex;
   justify-content: space-between;
+  width:${p => (p.bigger ? "50%" : "50%")}
+  height: ${p => (p.bigger ? "30%" : "15%")};
 `
-const JoinButton = styled.Button`
-  display: flex;
-  width: 50%;
-  height: 50%;
-  background-color: pink;
+const JoinButton = styled.TouchableOpacity`
+  font-weight: bold;
+  align-items: center;
+  background-color: #dddddd;
+  padding: 10px;
 `
-const CreateButton = styled.Button`
-  display: flex;
-  width: 50%;
-  height: 50%;
-  color: #f194ff;
-  background-color: #f194ff;
+const CreateButton = styled.TouchableOpacity`
+  align-items: center;
+  background-color: #dddddd;
+  padding: 10px;
 `
 
+const ButtonText = styled.Text`
+  color: red;
+  background-color: red;
+`
 export const MenuScreen = ({
   createGame,
   joinGame
@@ -38,10 +61,19 @@ export const MenuScreen = ({
     startGameType,
     setStartGameType
   ] = React.useState<StartGameTypes | null>(null)
-
+  const styles = StyleSheet.create({
+    button: {}
+  })
   return (
-    <MenuRoot>
-      <ButtonContainer>
+    <MainBackground
+      blurRadius={Platform.OS == "ios" ? 10 : 2}
+      source={mainbackground}
+    >
+      <MenuRoot>
+        <LogoImage
+          source={logo}
+          resizeMode={ImageResizeMode.contain}
+        ></LogoImage>
         {startGameType ? (
           <JoinGameScreen
             createGame={createGame}
@@ -50,18 +82,28 @@ export const MenuScreen = ({
             goBack={() => setStartGameType(null)}
           ></JoinGameScreen>
         ) : (
-          <>
-            <JoinButton
-              onPress={() => setStartGameType(StartGameTypes.join)}
-              title="Join"
-            ></JoinButton>
+          <ButtonContainer>
+            <JoinButton onPress={() => setStartGameType(StartGameTypes.join)}>
+              <Text
+                style={{ fontWeight: "bold", fontFamily: "Bangers_400Regular" }}
+              >
+                {" "}
+                Join{" "}
+              </Text>
+            </JoinButton>
             <CreateButton
               onPress={() => setStartGameType(StartGameTypes.create)}
-              title="Create"
-            ></CreateButton>
-          </>
+            >
+              <Text
+                style={{ fontWeight: "bold", fontFamily: "Bangers_400Regular" }}
+              >
+                {" "}
+                Create{" "}
+              </Text>
+            </CreateButton>
+          </ButtonContainer>
         )}
-      </ButtonContainer>
-    </MenuRoot>
+      </MenuRoot>
+    </MainBackground>
   )
 }

@@ -1,5 +1,6 @@
 import React from "react"
 import styled from "styled-components/native"
+import { ButtonContainer } from "./MenuScreen"
 
 export enum StartGameTypes {
   join = "join",
@@ -8,17 +9,26 @@ export enum StartGameTypes {
 
 const JoinButton = styled.Button`
   display: flex;
-  background-color: pink;
+
+  color: pink;
 `
 const GoBackButton = styled.Button`
   display: flex;
-  background-color: red;
 `
 
 const InputFıelds = styled.TextInput`
   border: 1px;
-  border-radius: 0.2px;
+  background-color: white;
+
+  border-radius: 0.5px;
   padding: 5px;
+  color: green;
+  font-weight: bold;
+`
+const TypeOfGamesContainer = styled.View`
+  display: flex;
+  background-color: black;
+  height: 50%;
 `
 
 interface CreateScreenProps {
@@ -34,10 +44,10 @@ export const JoinGameScreen = ({
   startGameType,
   goBack
 }: CreateScreenProps) => {
-  const [playerName, setPlayerName] = React.useState("gab")
-  const [gameName, setGameName] = React.useState("gamename")
+  const [playerName, setPlayerName] = React.useState("")
+  const [gameName, setGameName] = React.useState("")
   return (
-    <>
+    <ButtonContainer bigger>
       <InputFıelds
         onChangeText={text => text.length < 10 && setPlayerName(text)}
         placeholder="Your name"
@@ -51,6 +61,7 @@ export const JoinGameScreen = ({
         value={gameName}
       ></InputFıelds>
       <JoinButton
+        color="green"
         title={
           startGameType === StartGameTypes.join ? "Join room" : "Create room"
         }
@@ -63,11 +74,12 @@ export const JoinGameScreen = ({
         }}
       ></JoinButton>
       <GoBackButton
+        color="red"
         title={"Go back"}
         onPress={() => {
           goBack()
         }}
       ></GoBackButton>
-    </>
+    </ButtonContainer>
   )
 }
