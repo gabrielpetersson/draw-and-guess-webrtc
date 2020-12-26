@@ -40,7 +40,7 @@ const PlayerName = styled.Text`
 const Message = styled.Text`
   position: absolute;
   left: 0;
-  background-color: rgba(0, 240, 0, 0.11);
+  background-color: white;
   border-radius: 4px;
   padding: 4px;
   font-size: 12px;
@@ -49,7 +49,7 @@ const Message = styled.Text`
 `
 const GuessingContainer = styled.View`
   width: 100%;
-  padding: 15px 30px;
+  padding: 10px 30px;
   flex-direction: row;
   border-top-color: black;
   border-top-width: 1px;
@@ -157,10 +157,15 @@ export const GameScreen = ({
           <Text style={{ fontSize: 12 }}>
             {game.currentTurn
               ? isPainter
-                ? ""
+                ? "Paint a"
                 : "is painting!"
-              : "Waiting for game to start..."}
+              : "Waiting for players to press ready..."}
           </Text>
+          <Spacer width={4} />
+          <GameName style={{ fontSize: 12 }}>
+            {game.currentTurn && isPainter ? game.currentTurn.painterWord : ""}
+          </GameName>
+          <Spacer width={4} />
         </HeaderRow>
       </GameHeader>
       <GameContent
@@ -215,10 +220,8 @@ export const GameScreen = ({
           <TextInput
             placeholderTextColor="black"
             placeholder="Guess.."
-            value={guess}
-            onChangeText={(text: string) =>
-              text.length < 14 && setGuess(text.toLowerCase().replace(" ", ""))
-            }
+            defaultValue={guess}
+            onChangeText={(text: string) => text}
             blurOnSubmit={false}
             onSubmitEditing={() => {
               if (!guess) return
