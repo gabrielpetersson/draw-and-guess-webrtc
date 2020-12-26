@@ -35,18 +35,16 @@ const createPanResponder = ({
 
 export const drawLinesToCanvas = ({
   canvas,
-  lines,
-  lineWidth = 5
+  lines
 }: {
   canvas: Canvas
   lines: Line[]
-  lineWidth?: number
 }) => {
   const ctx = canvas.getContext("2d")
   if (!lines.length) return
   const endOfLine = lines[lines.length - 1].slice(-3)
   ctx.beginPath()
-  ctx.lineWidth = lineWidth
+  ctx.lineWidth = 3
   ctx.lineCap = "round"
   ctx.lineJoin = "round"
   endOfLine.forEach((point, i, points) => {
@@ -69,8 +67,13 @@ export const drawLinesToCanvas = ({
 interface GameCanvaProps {
   lineHandler: LineHandler
   sendPoint: (p: Point) => void
+  isPainter: boolean
 }
-export const GameCanvas = ({ lineHandler, sendPoint }: GameCanvaProps) => {
+export const GameCanvas = ({
+  lineHandler,
+  sendPoint,
+  isPainter
+}: GameCanvaProps) => {
   const [canvas, setCanvas] = React.useState<Canvas | null>(null)
   const [
     panResponder,
@@ -80,6 +83,7 @@ export const GameCanvas = ({ lineHandler, sendPoint }: GameCanvaProps) => {
   const { endLine, createNewLine, addNewPoint, lines } = lineHandler
 
   React.useEffect(() => {
+    if (!isPainter) return // only allow for current painter to paint
     setPanResponder(
       createPanResponder({
         endLine,
@@ -101,7 +105,6 @@ export const GameCanvas = ({ lineHandler, sendPoint }: GameCanvaProps) => {
     <Animated.View
       {...panResponder?.panHandlers}
       style={{
-        backgroundColor: "yellow",
         width: Dimensions.get("window").width,
         height: Dimensions.get("window").width
       }}
@@ -111,7 +114,8 @@ export const GameCanvas = ({ lineHandler, sendPoint }: GameCanvaProps) => {
         style={{
           width: "100%",
           height: "100%",
-          backgroundColor: "blue"
+          borderWidth: 1,
+          borderColor: isPainter ? "#15c573" : "transparent"
         }}
         // @ts-ignore - width and height indeed does exist here.
         width={Dimensions.get("window").width}

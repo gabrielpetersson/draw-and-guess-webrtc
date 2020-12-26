@@ -40,7 +40,7 @@ const PlayerName = styled.Text`
 const Message = styled.Text`
   position: absolute;
   left: 0;
-  background-color: rgba(0, 240, 0, 0.11);
+  background-color: white;
   border-radius: 4px;
   padding: 4px;
   font-size: 12px;
@@ -49,8 +49,7 @@ const Message = styled.Text`
 `
 const GuessingContainer = styled.View`
   width: 100%;
-  height: 64px;
-  padding: 15px 20px;
+  padding: 10px 30px;
   flex-direction: row;
 
   border-top-color: gray;
@@ -65,9 +64,9 @@ const LeaveButton = styled.View`
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  width: 30px;
-  height: 100%;
-  flex: 1;
+  height: 34px;
+  align-self: center;
+  width: 76px;
 `
 const LeaveText = styled.Text`
   color: white;
@@ -76,7 +75,6 @@ const LeaveText = styled.Text`
 `
 const GameHeader = styled.View`
   position: absolute;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
   border-bottom-color: gray;
@@ -87,16 +85,22 @@ const GameHeader = styled.View`
   background-color: #636380;
   color: white;
   top: 20px;
+
+  background-color: rgba(0, 0, 0, 0.02);
+  border-bottom-color: rgba(0, 0, 0, 0.4);
+  border-bottom-width: 1px;
+
   left: 0;
+  top: 0;
   width: 100%;
-  height: 56px;
+  padding: 20px;
+  z-index: 1000;
 `
 const GameName = styled.Text`
   color: #15c573;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
 `
-
 const GameFooter = styled.View`
   position: absolute;
   justify-content: flex-end;
@@ -105,7 +109,12 @@ const GameFooter = styled.View`
   width: 100%;
   z-index: 10000000000000;
 `
-
+const HeaderRow = styled.View`
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+`
 interface ChatUserComponentProps {
   game: Game
   makeGuess: (guess: string) => void
@@ -140,12 +149,40 @@ export const GameScreen = ({
       useNativeDriver: false
     }).start()
   }
+  const isPainter = localPlayerId === game.currentTurn?.painterPlayerId
   return (
     <GameRoot>
       <GameHeader>
-        <Text>Room name:</Text>
-        <Spacer width={10} />
-        <GameName>{game.name}</GameName>
+        <HeaderRow>
+          <Text>Room name:</Text>
+          <Spacer width={5} />
+          <GameName>{game.name}</GameName>
+        </HeaderRow>
+        <Spacer height={10} />
+        <HeaderRow>
+          <GameName style={{ fontSize: 12 }}>
+            {game.currentTurn
+              ? isPainter
+                ? "Your turn!"
+                : Object.values(game.participants).find(
+                    p => p.id === game.currentTurn?.painterPlayerId
+                  )?.name || "some error"
+              : ""}
+          </GameName>
+          <Spacer width={4} />
+          <Text style={{ fontSize: 12 }}>
+            {game.currentTurn
+              ? isPainter
+                ? "Paint a"
+                : "is painting!"
+              : "Waiting for players to press ready..."}
+          </Text>
+          <Spacer width={4} />
+          <GameName style={{ fontSize: 12 }}>
+            {game.currentTurn && isPainter ? game.currentTurn.painterWord : ""}
+          </GameName>
+          <Spacer width={4} />
+        </HeaderRow>
       </GameHeader>
       <GameContent
         markAsReady={markAsReady}
@@ -201,10 +238,8 @@ export const GameScreen = ({
           <TextInput
             placeholderTextColor="black"
             placeholder="Guess.."
-            value={guess}
-            onChangeText={(text: string) =>
-              text.length < 14 && setGuess(text.toLowerCase().replace(" ", ""))
-            }
+            defaultValue={guess}
+            onChangeText={(text: string) => text}
             blurOnSubmit={false}
             onSubmitEditing={() => {
               if (!guess) return
@@ -212,7 +247,7 @@ export const GameScreen = ({
               setGuess("")
             }}
             style={{
-              flex: 4
+              flex: 1
             }}
           />
           <TouchableWithoutFeedback onPress={leaveGame}>

@@ -94,6 +94,13 @@ export const GameContent = ({
         </TouchableWithoutFeedback>
       </WhatToPaintContainer>
     )
-  } else content = <GameCanva lineHandler={lineHandler} sendPoint={sendPoint} />
+  } else
+    content = (
+      <GameCanva
+        isPainter={isPainter}
+        lineHandler={lineHandler}
+        sendPoint={sendPoint}
+      />
+    )
   return <GameContentWrapper>{content}</GameContentWrapper>
 }
