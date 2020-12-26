@@ -49,8 +49,7 @@ const Message = styled.Text`
 `
 const GuessingContainer = styled.View`
   width: 100%;
-  height: 64px;
-  padding: 15px 20px;
+  padding: 15px 30px;
   flex-direction: row;
   border-top-color: black;
   border-top-width: 1px;
@@ -60,9 +59,9 @@ const LeaveButton = styled.View`
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  width: 30px;
-  height: 100%;
-  flex: 1;
+  height: 34px;
+  align-self: center;
+  width: 76px;
 `
 const LeaveText = styled.Text`
   color: white;
@@ -71,23 +70,22 @@ const LeaveText = styled.Text`
 `
 const GameHeader = styled.View`
   position: absolute;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
-  border-bottom-color: gray;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-bottom-color: rgba(0, 0, 0, 0.4);
   border-bottom-width: 1px;
-  background-color: #f4f4f4;
-  top: 20px;
   left: 0;
+  top: 0;
   width: 100%;
-  height: 56px;
+  padding: 20px;
+  z-index: 1000;
 `
 const GameName = styled.Text`
   color: #15c573;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
 `
-
 const GameFooter = styled.View`
   position: absolute;
   justify-content: flex-end;
@@ -96,7 +94,12 @@ const GameFooter = styled.View`
   width: 100%;
   z-index: 10000000000000;
 `
-
+const HeaderRow = styled.View`
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+`
 interface ChatUserComponentProps {
   game: Game
   makeGuess: (guess: string) => void
@@ -130,12 +133,35 @@ export const GameScreen = ({
       useNativeDriver: false
     }).start()
   }
+  const isPainter = localPlayerId === game.currentTurn?.painterPlayerId
   return (
     <GameRoot>
       <GameHeader>
-        <Text>Room name:</Text>
-        <Spacer width={10} />
-        <GameName>{game.name}</GameName>
+        <HeaderRow>
+          <Text>Room name:</Text>
+          <Spacer width={5} />
+          <GameName>{game.name}</GameName>
+        </HeaderRow>
+        <Spacer height={10} />
+        <HeaderRow>
+          <GameName style={{ fontSize: 12 }}>
+            {game.currentTurn
+              ? isPainter
+                ? "Your turn!"
+                : Object.values(game.participants).find(
+                    p => p.id === game.currentTurn?.painterPlayerId
+                  )?.name || "some error"
+              : ""}
+          </GameName>
+          <Spacer width={4} />
+          <Text style={{ fontSize: 12 }}>
+            {game.currentTurn
+              ? isPainter
+                ? ""
+                : "is painting!"
+              : "Waiting for game to start..."}
+          </Text>
+        </HeaderRow>
       </GameHeader>
       <GameContent
         markAsReady={markAsReady}
@@ -200,7 +226,7 @@ export const GameScreen = ({
               setGuess("")
             }}
             style={{
-              flex: 4
+              flex: 1
             }}
           />
           <TouchableWithoutFeedback onPress={leaveGame}>
