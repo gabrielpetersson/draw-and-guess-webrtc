@@ -7,6 +7,7 @@ import {
 } from "react-native"
 import styled from "styled-components/native"
 import { Game } from "../../shared"
+import { LineHandler, Point } from "../lib/useLines"
 import { GameContent } from "./GameContent"
 import { Spacer } from "./Spacer"
 
@@ -103,6 +104,8 @@ interface ChatUserComponentProps {
   markAsReady: () => void
   localPlayerId: string
   markPainterAsReady: () => void
+  lineHandler: LineHandler
+  sendPoint: (p: Point) => void
 }
 export const GameScreen = ({
   game,
@@ -110,7 +113,9 @@ export const GameScreen = ({
   leaveGame,
   markAsReady,
   localPlayerId,
-  markPainterAsReady
+  markPainterAsReady,
+  lineHandler,
+  sendPoint
 }: ChatUserComponentProps) => {
   const [guess, setGuess] = React.useState("")
   const [messageFades, setMessageFades] = React.useState<
@@ -125,7 +130,6 @@ export const GameScreen = ({
       useNativeDriver: false
     }).start()
   }
-  console.log("GAME")
   return (
     <GameRoot>
       <GameHeader>
@@ -138,6 +142,8 @@ export const GameScreen = ({
         markPainterAsReady={markPainterAsReady}
         localPlayerId={localPlayerId}
         game={game}
+        lineHandler={lineHandler}
+        sendPoint={sendPoint}
       />
       <GameFooter>
         <Players>

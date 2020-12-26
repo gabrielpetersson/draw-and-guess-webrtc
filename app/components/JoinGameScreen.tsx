@@ -44,8 +44,8 @@ export const JoinGameScreen = ({
   startGameType,
   goBack
 }: CreateScreenProps) => {
-  const [playerName, setPlayerName] = React.useState("")
-  const [gameName, setGameName] = React.useState("")
+  const [playerName, setPlayerName] = React.useState("gab")
+  const [gameName, setGameName] = React.useState("roomName")
   return (
     <ButtonContainer bigger>
       <InputFıelds

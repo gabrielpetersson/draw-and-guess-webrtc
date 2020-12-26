@@ -1,55 +1,91 @@
 import React from "react"
+import { Dimensions } from "react-native"
 import {
   RTCPeerConnection,
   RTCIceCandidate,
   RTCSessionDescriptionType,
-  registerGlobals
+  registerGlobals,
+  RTCIceCandidateType
 } from "react-native-webrtc"
 import { io, Socket } from "socket.io-client/build/index"
 import { CreateGameOptions, Game, JoinGameOptions } from "../../shared"
+import { useLines } from "../lib/useLines"
 
 registerGlobals()
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
 
 export const useWebRTC = () => {
   const [error, setError] = React.useState("")
+
   const [localPlayerId, setLocalPlayerId] = React.useState("")
   const peerConnections = React.useRef<Map<string, RTCPeerConnection>>(
     new Map()
   )
   const [game, setGame] = React.useState<Game | null>(null)
   const [socket, setSocket] = React.useState<Socket | null>(null)
+  const [dataChannel, setDataChannel] = React.useState<RTCDataChannel | null>(
+    null
+  )
+
+  const lineHandler = useLines()
+
   React.useEffect(() => {
-    const socket = io("ws://192.168.8.100:8000")
+    if (!dataChannel) return
+    // @ts-ignore react native webrtc types are mega outdated
+    dataChannel.onmessage = (ev: MessageEvent) => {
+      const data = JSON.parse(ev.data)
+      const newPoint = {
+        x: data[0] * Dimensions.get("screen").width,
+        y: data[1] * Dimensions.get("screen").height
+      }
+      lineHandler.addNewPoint(newPoint)
+    }
+  }, [dataChannel])
+
+  //@ts-ignore
+  const sendPoint = (point: Point) => {
+    if (!dataChannel) return
+    const { width, height } = Dimensions.get("screen")
+    const normalizedPoint = [point.x / width, point.y / height]
+    dataChannel?.send(JSON.stringify(normalizedPoint))
+  }
+
+  React.useEffect(() => {
+    const socket = io("ws://192.168.1.232:8000")
     socket.on("connect", () => {
       console.log("connected")
-      // socket.emit("broadcaster")
-      // socket.on("broadcaster", () => console.log("broadcaster"))
+      socket.emit("broadcaster")
 
       socket.on("webrtcWatcher", async (id: string) => {
-        console.log("INITING LOCAL", id)
         const localConnection = new RTCPeerConnection(config)
-        console.log("created localcon", localConnection)
-        const dataChannel = localConnection.createDataChannel("sendChannel")
+
+        const dataChannel = (localConnection.createDataChannel(
+          "text"
+        ) as unknown) as RTCDataChannel // types are outdated
+
+        dataChannel.onerror = function (error) {
+          console.log("dataChannel.onerror", error)
+        }
+
+        dataChannel.onopen = function () {
+          setDataChannel(dataChannel)
+        }
+
+        dataChannel.onclose = function () {
+          console.log("dataChannel.onclose")
+        }
 
         localConnection.onicecandidate = ({ candidate }) => {
+          // console.log("local ice cand", candidate)
           if (candidate) socket.emit("candidate", id, candidate)
         }
 
-        console.log("DC", dataChannel)
-        dataChannel.onopen = (d: any) =>
-          console.log(
-            "OPEN DATACAHNNEL__________________________###########################################################################################################",
-            d
-          )
-        dataChannel.onclose = (d: any) => console.log(d)
+        localConnection.oniceconnectionstatechange = e =>
+          console.log("[ICE STATUS]", e.target.iceConnectionState)
 
-        // localConnection.onicecandidate = ({ candidate }) => {
-        //   console.log("GOT CANDIDATE2")
-        //   if (candidate) socket.emit("candidate", id, candidate)
-        // }
-
-        const localDescription = await localConnection.createOffer()
+        const localDescription = await localConnection.createOffer({
+          iceRestart: true
+        })
         await localConnection.setLocalDescription(localDescription)
         socket.emit("webrtcOffer", id, localConnection.localDescription)
         peerConnections.current.set(id, localConnection)
@@ -58,31 +94,51 @@ export const useWebRTC = () => {
       socket.on(
         "webrtcOffer",
         async (id: string, offer: RTCSessionDescriptionType) => {
-          console.log("got offer", offer)
           const localConnection = new RTCPeerConnection(config)
-          // localConnection.onicecandidate = ({ candidate }) => {
-          //   console.log("GOT CANDIDATE", candidate)
-          //   if (candidate) socket.emit("candidate", id, candidate)
-          // }
+
+          localConnection.onicecandidate = ({ candidate }) => {
+            if (candidate) socket.emit("candidate", id, candidate)
+          }
+
+          // @ts-ignore
+          localConnection.ondatachannel = ({
+            channel
+          }: {
+            channel: RTCDataChannel
+          }) => {
+            channel.onopen = () => setDataChannel(channel)
+          }
 
           await localConnection.setRemoteDescription(offer)
           const localDescription = await localConnection.createAnswer()
+          await localConnection.setLocalDescription(localDescription)
           socket.emit("webrtcAnswer", id, localDescription)
         }
       )
 
-      socket.on("candidate", (id: string, candidate: any) => {
-        const candidateBuffer = new RTCIceCandidate(candidate as any)
+      socket.on("candidate", (id: string, candidate: RTCIceCandidateType) => {
         const connectionBuffer = peerConnections.current.get(id)
         if (!connectionBuffer) return
-        connectionBuffer.addIceCandidate(candidateBuffer)
+        setTimeout(
+          () =>
+            connectionBuffer.addIceCandidate(candidate).catch(e => {
+              console.log("Failure during addIceCandidate(): " + e.name)
+            }),
+          800
+        )
       })
 
-      socket.on("answer", (id: string, remoteOfferDescription: any) => {
-        const localConnection = peerConnections.current.get(id)
-        if (!localConnection) return
-        localConnection.setRemoteDescription(remoteOfferDescription)
-      })
+      socket.on(
+        "answer",
+        async (
+          id: string,
+          remoteOfferDescription: RTCSessionDescriptionType
+        ) => {
+          const localConnection = peerConnections.current.get(id)
+          if (!localConnection) return
+          localConnection.setRemoteDescription(remoteOfferDescription)
+        }
+      )
 
       socket.on("disconnectPeer", (id: string) => {
         if (!peerConnections.current) return
@@ -128,6 +184,8 @@ export const useWebRTC = () => {
     game,
     error,
     localPlayerId,
+    lineHandler,
+    sendPoint,
     leaveGame: () => {
       socket?.emit("leaveGame")
       setGame(null)

@@ -2,6 +2,7 @@ import React from "react"
 import { Dimensions, Text, TouchableWithoutFeedback } from "react-native"
 import styled from "styled-components/native"
 import { Game } from "../../shared"
+import { LineHandler, Point } from "../lib/useLines"
 import { GameCanvas as GameCanva } from "./GameCanvass"
 
 const GameContentWrapper = styled.View`
@@ -59,12 +60,16 @@ interface GameContentProps {
   markPainterAsReady: () => void
   localPlayerId: string
   game: Game
+  lineHandler: LineHandler
+  sendPoint: (p: Point) => void
 }
 export const GameContent = ({
   markAsReady,
   markPainterAsReady,
   localPlayerId,
-  game
+  game,
+  lineHandler,
+  sendPoint
 }: GameContentProps) => {
   let content: React.ReactNode
   const isReady = isLocalPlayerReady(game, localPlayerId)
@@ -89,6 +94,6 @@ export const GameContent = ({
         </TouchableWithoutFeedback>
       </WhatToPaintContainer>
     )
-  } else content = <GameCanva />
+  } else content = <GameCanva lineHandler={lineHandler} sendPoint={sendPoint} />
   return <GameContentWrapper>{content}</GameContentWrapper>
 }

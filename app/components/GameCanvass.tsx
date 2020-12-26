@@ -6,33 +6,7 @@ import {
   PanResponderInstance
 } from "react-native"
 import Canvas from "react-native-canvas"
-
-interface Point {
-  x: number
-  y: number
-}
-type Line = Point[]
-interface LineHandler {
-  endLine: () => void
-  createNewLine: () => void
-  addNewPoint: (point: Point) => void
-  lines: Line[]
-}
-const useLines = (): LineHandler => {
-  const [lines, setLines] = React.useState([] as Line[])
-
-  const createNewLine = React.useCallback(() => {
-    setLines(prevLines => [...prevLines, []])
-  }, [])
-  const addNewPoint = React.useCallback((point: Point) => {
-    setLines(lines => [
-      ...lines.slice(0, lines.length - 1),
-      [...lines[lines.length - 1], point]
-    ])
-  }, [])
-  const endLine = React.useCallback(() => {}, [])
-  return { endLine, createNewLine, addNewPoint, lines }
-}
+import { Line, LineHandler, Point, useLines } from "../lib/useLines"
 
 const createPanResponder = ({
   endLine,
@@ -92,16 +66,30 @@ export const drawLinesToCanvas = ({
   ctx.stroke()
 }
 
-export const GameCanvas = () => {
+interface GameCanvaProps {
+  lineHandler: LineHandler
+  sendPoint: (p: Point) => void
+}
+export const GameCanvas = ({ lineHandler, sendPoint }: GameCanvaProps) => {
   const [canvas, setCanvas] = React.useState<Canvas | null>(null)
   const [
     panResponder,
     setPanResponder
   ] = React.useState<PanResponderInstance | null>(null)
-  const { endLine, createNewLine, addNewPoint, lines } = useLines()
+
+  const { endLine, createNewLine, addNewPoint, lines } = lineHandler
 
   React.useEffect(() => {
-    setPanResponder(createPanResponder({ endLine, createNewLine, addNewPoint }))
+    setPanResponder(
+      createPanResponder({
+        endLine,
+        createNewLine,
+        addNewPoint: (p: Point) => {
+          addNewPoint(p)
+          sendPoint(p)
+        }
+      })
+    )
   }, [endLine, createNewLine, addNewPoint])
 
   React.useEffect(() => {
@@ -125,6 +113,7 @@ export const GameCanvas = () => {
           height: "100%",
           backgroundColor: "blue"
         }}
+        // @ts-ignore - width and height indeed does exist here.
         width={Dimensions.get("window").width}
         height={Dimensions.get("window").width}
         ref={(c: Canvas) => {

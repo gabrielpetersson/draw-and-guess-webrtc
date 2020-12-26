@@ -30,7 +30,9 @@ export const MainScreen = () => {
     error,
     localPlayerId,
     markAsReady,
-    markPainterAsReady
+    markPainterAsReady,
+    lineHandler,
+    sendPoint
   } = useWebRTC()
 
   return (
@@ -44,6 +46,8 @@ export const MainScreen = () => {
           leaveGame={leaveGame}
           game={game}
           makeGuess={makeGuess}
+          lineHandler={lineHandler}
+          sendPoint={sendPoint}
         />
       ) : (
         <MenuScreen createGame={createGame} joinGame={joinGame} />
