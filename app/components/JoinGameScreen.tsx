@@ -1,7 +1,11 @@
 import React from "react"
 import { Text } from "react-native"
 import styled from "styled-components/native"
-import { LIGHT_GREEN, THIS_COLOR_IS_DOPE } from "../lib/constants"
+import {
+  LIGHT_GREEN,
+  THIS_COLOR_IS_DOPE,
+  VERY_COOL_PURPLE
+} from "../lib/constants"
 import { Spacer } from "./Spacer"
 
 export enum StartGameTypes {
@@ -12,7 +16,7 @@ export enum StartGameTypes {
 const ButtonContainer = styled.View`
   display: flex;
   justify-content: center;
-  width: 140px;
+  width: 40%;
 `
 
 const GameInput = styled.TextInput`
@@ -73,7 +77,7 @@ export const JoinGameScreen = ({
         <NavigationButton
           // color={LIGHT_GREEN}
           // disabled={!playerName || !gameName}
-          style={{ width: "60%", backgroundColor: "#6680FF" }}
+          style={{ width: "60%", backgroundColor: VERY_COOL_PURPLE }}
           onPress={() => {
             if (startGameType === StartGameTypes.join)
               joinGame(gameName, playerName)
@@ -91,7 +95,7 @@ export const JoinGameScreen = ({
         <NavigationButton
           style={{
             width: "30%",
-            backgroundColor: "#6680FF",
+            backgroundColor: VERY_COOL_PURPLE,
             // borderWidth: 1,
             // borderColor: "#6680FF",
             boxSizing: "border-box"

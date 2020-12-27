@@ -1,4 +1,6 @@
 export const LIGHT_BLUE = "#66CCFF"
 export const UGLY_BLUE = "#0099CC"
+export const DARK_GREEN = "#009900"
 export const LIGHT_GREEN = "#CCFFCC"
 export const THIS_COLOR_IS_DOPE = "#FF9966"
+export const VERY_COOL_PURPLE = "#6680FF"

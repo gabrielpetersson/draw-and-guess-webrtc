@@ -203,7 +203,7 @@ export const useWebRTC = () => {
 
       socket.on("disconnect", () => {
         console.log("diconnected")
-        socket.off()
+        // socket.off()
         setGame(null)
       })
 

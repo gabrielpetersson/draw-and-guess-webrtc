@@ -32,7 +32,7 @@ const words = [
 const app = express()
 const server = new http.Server(app)
 const io = new SocketIO.Server(server)
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 8000
 
 app.get("/", (req, res) => {
   res.send("connectd")

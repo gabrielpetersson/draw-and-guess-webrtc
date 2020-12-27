@@ -7,6 +7,13 @@ import {
 } from "react-native"
 import styled from "styled-components/native"
 import { Game, Player } from "../../shared"
+import {
+  DARK_GREEN,
+  LIGHT_BLUE,
+  LIGHT_GREEN,
+  UGLY_BLUE,
+  VERY_COOL_PURPLE
+} from "../lib/constants"
 import { LineHandler, Point } from "../lib/useLines"
 import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 import { GameContent } from "./GameContent"
@@ -17,7 +24,7 @@ const GameRoot = styled.View`
   width: 100%;
   height: 100%;
   justify-content: flex-end;
-  background-color: #32324d;
+  background-color: ${LIGHT_BLUE};
 `
 const Players = styled.View`
   display: flex;
@@ -51,14 +58,13 @@ const Guess = styled.Text`
 `
 const GuessingContainer = styled.View`
   width: 100%;
-  padding: 10px 30px;
+  padding: 0 30px;
+  height: 76px;
   flex-direction: row;
   justify-content: flex-end;
   border-top-color: gray;
-  border-top-width: 3px;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-  background-color: #636380;
+  border-top-width: 1px;
+  background-color: white;
 `
 const LeaveButton = styled.View`
   background-color: red;
@@ -83,15 +89,13 @@ const GameHeader = styled.View`
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
 
-  background-color: #636380;
+  background-color: white;
   color: white;
   top: 20px;
 
-  background-color: rgba(0, 0, 0, 0.02);
   border-bottom-color: rgba(0, 0, 0, 0.4);
   border-bottom-width: 1px;
 
-  left: 0;
   top: 0;
   width: 100%;
   padding: 20px;
@@ -120,8 +124,8 @@ const HeaderRow = styled.View`
 const getPlayerColor = (player: Player, game: Game) => {
   if (!player.isReady) return "red"
   if (game.currentTurn?.correctGuessPlayerIds.includes(player.id))
-    return "#15c573"
-  if (player.id === game.currentTurn?.painterPlayerId) return "blue"
+    return DARK_GREEN
+  if (player.id === game.currentTurn?.painterPlayerId) return VERY_COOL_PURPLE
   return "white"
 }
 const getPlayerBorderColor = (player: Player, game: Game) => {
@@ -129,7 +133,7 @@ const getPlayerBorderColor = (player: Player, game: Game) => {
   if (game.currentTurn?.correctGuessPlayerIds.includes(player.id))
     return "white"
   if (player.id === game.currentTurn?.painterPlayerId) return "white"
-  return "#15c573"
+  return DARK_GREEN
 }
 
 interface ChatUserComponentProps {
@@ -153,7 +157,6 @@ export const GameScreen = ({
   webRTCLineHandler
 }: ChatUserComponentProps) => {
   const [guess, setGuess] = React.useState("")
-  const [userNumber, setUserNumber] = React.useState(0)
   const [messageFades, setMessageFades] = React.useState<
     Record<string, Animated.Value>
   >({})
@@ -238,7 +241,7 @@ export const GameScreen = ({
                       style={{
                         position: "absolute",
                         left: 0,
-                        top: i * -24 - 30,
+                        top: i * -34 - 30,
                         width: "100%",
                         opacity: animation
                       }}

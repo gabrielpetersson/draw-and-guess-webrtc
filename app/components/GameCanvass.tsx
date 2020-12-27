@@ -1,14 +1,8 @@
 import React from "react"
-import {
-  Animated,
-  Dimensions,
-  PanResponder,
-  PanResponderInstance
-} from "react-native"
+import { Animated, PanResponder, PanResponderInstance } from "react-native"
 import Canvas from "react-native-canvas"
-import { createNativeWrapper } from "react-native-gesture-handler"
 import { getCanvasSize } from "../lib/canvasSize"
-import { Line, LineHandler, Point, useLines } from "../lib/useLines"
+import { Line, LineHandler, Point } from "../lib/useLines"
 import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 
 const createPanResponder = ({
@@ -21,10 +15,10 @@ const createPanResponder = ({
   addNewPoint: (point: Point) => void
 }) => {
   return PanResponder.create({
-    onMoveShouldSetPanResponder: (e, gest) => {
+    onMoveShouldSetPanResponder: () => {
       return true
     },
-    onPanResponderGrant: e => {
+    onPanResponderGrant: () => {
       createNewLine()
     },
     onPanResponderMove: (e, gest) => {
@@ -121,7 +115,9 @@ export const GameCanvas = ({
           width: "100%",
           height: "100%",
           borderWidth: 1,
-          borderColor: isPainter ? "#15c573" : "transparent"
+          backgroundColor: "white",
+          borderRadius: 4,
+          borderColor: isPainter ? "black" : "transparent"
         }}
         // @ts-ignore - width and height indeed does exist here.
         width={canvasSize}

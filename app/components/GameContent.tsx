@@ -3,6 +3,7 @@ import { Text, TouchableWithoutFeedback } from "react-native"
 import styled from "styled-components/native"
 import { Game } from "../../shared"
 import { getCanvasSize } from "../lib/canvasSize"
+import { LIGHT_GREEN, VERY_COOL_PURPLE } from "../lib/constants"
 import { LineHandler, Point } from "../lib/useLines"
 import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 import { GameCanvas as GameCanva } from "./GameCanvass"
@@ -15,9 +16,7 @@ const GameContentWrapper = styled.View`
   height: ${getCanvasSize()}px;
 `
 const ReadyButton = styled.View`
-  background-color: #15c573;
-  color: white;
-  font-size: 24px;
+  background-color: ${VERY_COOL_PURPLE};
   font-weight: 900;
   padding: 10px 25px;
   justify-content: center;
@@ -34,17 +33,18 @@ const PaintReadyButton = styled.View`
   border-radius: 4px;
   padding: 10px 25px;
 `
-const WhatToPaintContainer = styled.View`
+const GameUpdateContainer = styled.View`
   width: 300px;
   height: 200px;
   border-width: 1px;
   padding: 20px;
   border-color: rgba(0, 0, 0, 0.5);
+  background-color: white;
   border-radius: 4px;
   justify-content: space-around;
   align-items: center;
 `
-const WhatToPaintText = styled.Text`
+const MessageUpdateText = styled.Text`
   color: black;
   text-align: center;
 `
@@ -104,33 +104,33 @@ export const GameContent = ({
       roundOverText = "Too bad, you ran out of time :( No points this time!"
     }
     content = (
-      <WhatToPaintContainer>
-        <WhatToPaintText>{roundOverText}</WhatToPaintText>
+      <GameUpdateContainer>
+        <MessageUpdateText>{roundOverText}</MessageUpdateText>
         {nCorrectGuesses > 2 || (nCorrectGuesses > 1 && !guessedCorrect) ? (
-          <WhatToPaintText>{`These people got it right: ${game.currentTurn.correctGuessPlayerIds
+          <MessageUpdateText>{`These people got it right: ${game.currentTurn.correctGuessPlayerIds
             .map(id => {
               Object.values(game.participants).find(p => p.id === id)?.name
             })
             .filter(Boolean)
-            .join(", ")}`}</WhatToPaintText>
+            .join(", ")}`}</MessageUpdateText>
         ) : null}
-      </WhatToPaintContainer>
+      </GameUpdateContainer>
     )
   } else if (!isPaineterReady && isPainter) {
     content = (
-      <WhatToPaintContainer>
-        <WhatToPaintText>{`Your turn to draw! Draw a ${game.currentTurn?.painterWord}`}</WhatToPaintText>
+      <GameUpdateContainer>
+        <MessageUpdateText>{`Your turn to draw! Draw a ${game.currentTurn?.painterWord}`}</MessageUpdateText>
         <TouchableWithoutFeedback onPress={markPainterAsReady}>
           <PaintReadyButton>
             <PaintText>Paint the word!</PaintText>
           </PaintReadyButton>
         </TouchableWithoutFeedback>
-      </WhatToPaintContainer>
+      </GameUpdateContainer>
     )
   } else if (!isPaineterReady) {
     content = (
-      <WhatToPaintContainer>
-        <WhatToPaintText>
+      <GameUpdateContainer>
+        <MessageUpdateText>
           {game.currentTurn?.painterPlayerId
             ? `Waiting for ${
                 Object.values(game.participants).find(
@@ -138,8 +138,8 @@ export const GameContent = ({
                 )?.name
               } to start painting...`
             : "Waiting until all players are ready"}
-        </WhatToPaintText>
-      </WhatToPaintContainer>
+        </MessageUpdateText>
+      </GameUpdateContainer>
     )
   } else
     content = (
