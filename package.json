@@ -1,0 +1,37 @@
+{
+    "name": "tink",
+    "workspaces": {
+      "packages": ["app", "server"],
+      "nohoist": [
+        "**/app",
+        "**/app/**",
+        "**/server",
+        "**/server/**"
+      ]
+    },
+    "version": "0.1.0",
+    "engines": {
+      "node": "12.x"
+    },
+    "private": true,
+    "scripts": {
+      "app": "yarn workspace app start",
+      "android": "yarn workspace app android",
+      "be:dev": "yarn workspace server start:dev",
+      "build": "yarn workspace server build",
+      "dstart": "yarn build && yarn workspace server start"
+    },
+    "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    }
+  }
+  

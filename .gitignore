@@ -1,2 +1,3 @@
 *.hprof
 .idea
+**/node_modules

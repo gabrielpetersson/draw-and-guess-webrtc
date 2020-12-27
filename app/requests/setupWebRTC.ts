@@ -200,12 +200,15 @@ export const useWebRTC = () => {
         setError(error)
         setTimeout(() => setError(""), 5000) // quickfix, should be removed on actions instead
       })
+
       socket.on("disconnect", () => {
         console.log("diconnected")
         socket.off()
         setGame(null)
       })
+
       socket.on("playerId", setLocalPlayerId)
+
       socket.onAny(e => console.log("[event]", e))
     })
 
