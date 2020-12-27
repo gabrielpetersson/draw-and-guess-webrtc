@@ -32,7 +32,7 @@ export const MainScreen = () => {
     markAsReady,
     markPainterAsReady,
     lineHandler,
-    sendPoint
+    webRTCLineHandler
   } = useWebRTC()
 
   return (
@@ -47,7 +47,7 @@ export const MainScreen = () => {
           game={game}
           makeGuess={makeGuess}
           lineHandler={lineHandler}
-          sendPoint={sendPoint}
+          webRTCLineHandler={webRTCLineHandler}
         />
       ) : (
         <MenuScreen createGame={createGame} joinGame={joinGame} />

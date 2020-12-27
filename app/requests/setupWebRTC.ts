@@ -1,19 +1,22 @@
 import React from "react"
-import { Dimensions } from "react-native"
 import {
   RTCPeerConnection,
-  RTCIceCandidate,
   RTCSessionDescriptionType,
   registerGlobals,
   RTCIceCandidateType
 } from "react-native-webrtc"
 import { io, Socket } from "socket.io-client/build/index"
 import { CreateGameOptions, Game, JoinGameOptions } from "../../shared"
-import { useLines } from "../lib/useLines"
+import { getCanvasSize } from "../lib/canvasSize"
+import { Point, useLines } from "../lib/useLines"
 
 registerGlobals()
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
 
+export interface IWebRTCLineHandler {
+  sendPoint: (p: Point) => void
+  sendNewLine: () => void
+}
 export const useWebRTC = () => {
   const [error, setError] = React.useState("")
 
@@ -31,52 +34,74 @@ export const useWebRTC = () => {
 
   React.useEffect(() => {
     if (!dataChannel) return
-    // @ts-ignore react native webrtc types are mega outdated
+    console.log("Data channel open")
     dataChannel.onmessage = (ev: MessageEvent) => {
-      const data = JSON.parse(ev.data)
-      const newPoint = {
-        x: data[0] * Dimensions.get("screen").width,
-        y: data[1] * Dimensions.get("screen").height
+      const [intent, ...data] = JSON.parse(ev.data)
+
+      if (intent === 0) {
+        const size = getCanvasSize()
+        const newPoint = {
+          x: data[0] * size,
+          y: data[1] * size
+        }
+        lineHandler.addNewPoint(newPoint)
+      } else if (intent === 1) {
+        lineHandler.createNewLine()
       }
-      lineHandler.addNewPoint(newPoint)
     }
   }, [dataChannel])
 
-  //@ts-ignore
+  const truncate = (n: number) => Math.floor(100 * n + 0.5) / 100
   const sendPoint = (point: Point) => {
     if (!dataChannel) return
-    const { width, height } = Dimensions.get("screen")
-    const normalizedPoint = [point.x / width, point.y / height]
+    const size = getCanvasSize()
+    const normalizedPoint = [
+      0,
+      truncate(point.x / size),
+      truncate(point.y / size)
+    ]
     dataChannel?.send(JSON.stringify(normalizedPoint))
+  }
+  const sendNewLine = () => {
+    if (!dataChannel) return
+    dataChannel?.send(JSON.stringify([1]))
+  }
+
+  const disconnectAllPeers = () => {
+    Object.values(peerConnections.current).forEach(peer => {
+      peer.close()
+    })
+    peerConnections.current = new Map()
+  }
+  const disconnectSelf = () => {
+    socket?.emit("webrtcDisconnectSelf")
   }
 
   React.useEffect(() => {
     const socket = io("ws://192.168.1.232:8000")
     socket.on("connect", () => {
       console.log("connected")
-      socket.emit("broadcaster")
 
       socket.on("webrtcWatcher", async (id: string) => {
+        console.log("webrtcWatcher###############################", id)
         const localConnection = new RTCPeerConnection(config)
-
         const dataChannel = (localConnection.createDataChannel(
           "text"
         ) as unknown) as RTCDataChannel // types are outdated
 
-        dataChannel.onerror = function (error) {
-          console.log("dataChannel.onerror", error)
+        dataChannel.onerror = err => {
+          console.log("dataChannel.onerror", err)
         }
 
-        dataChannel.onopen = function () {
+        dataChannel.onopen = () => {
           setDataChannel(dataChannel)
         }
 
-        dataChannel.onclose = function () {
+        dataChannel.onclose = () => {
           console.log("dataChannel.onclose")
         }
 
         localConnection.onicecandidate = ({ candidate }) => {
-          // console.log("local ice cand", candidate)
           if (candidate) socket.emit("candidate", id, candidate)
         }
 
@@ -94,13 +119,14 @@ export const useWebRTC = () => {
       socket.on(
         "webrtcOffer",
         async (id: string, offer: RTCSessionDescriptionType) => {
+          console.log("GOT OFFEEEEEEEEEEEEEEEEEEEEEEEEEEER")
           const localConnection = new RTCPeerConnection(config)
 
           localConnection.onicecandidate = ({ candidate }) => {
             if (candidate) socket.emit("candidate", id, candidate)
           }
 
-          // @ts-ignore
+          // @ts-ignore / outdated types
           localConnection.ondatachannel = ({
             channel
           }: {
@@ -119,23 +145,18 @@ export const useWebRTC = () => {
       socket.on("candidate", (id: string, candidate: RTCIceCandidateType) => {
         const connectionBuffer = peerConnections.current.get(id)
         if (!connectionBuffer) return
-        setTimeout(
-          () =>
-            connectionBuffer.addIceCandidate(candidate).catch(e => {
-              console.log("Failure during addIceCandidate(): " + e.name)
-            }),
-          800
-        )
+        setTimeout(() => connectionBuffer.addIceCandidate(candidate), 400)
       })
 
       socket.on(
-        "answer",
-        async (
-          id: string,
-          remoteOfferDescription: RTCSessionDescriptionType
-        ) => {
+        "webrtcAnswer",
+        (id: string, remoteOfferDescription: RTCSessionDescriptionType) => {
           const localConnection = peerConnections.current.get(id)
-          if (!localConnection) return
+          if (!localConnection) {
+            console.error("Did not find peer")
+            return
+          }
+          console.log("[REMOTE DESC STATE]", localConnection.signalingState)
           localConnection.setRemoteDescription(remoteOfferDescription)
         }
       )
@@ -151,12 +172,15 @@ export const useWebRTC = () => {
       })
 
       socket.on("leaveGame", () => {
+        disconnectSelf()
+        disconnectAllPeers()
         setGame(null)
       })
 
       socket.on("error", (error: string) => {
         console.log("GOT ERROR", error)
         setError(error)
+        setTimeout(() => setError(""), 5000) // quickfix, should be removed on actions instead
       })
       socket.on("disconnect", () => setGame(null))
       socket.on("playerId", setLocalPlayerId)
@@ -185,7 +209,7 @@ export const useWebRTC = () => {
     error,
     localPlayerId,
     lineHandler,
-    sendPoint,
+    webRTCLineHandler: { sendPoint, sendNewLine },
     leaveGame: () => {
       socket?.emit("leaveGame")
       setGame(null)

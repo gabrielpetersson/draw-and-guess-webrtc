@@ -5,7 +5,6 @@ import { JoinGameScreen, StartGameTypes } from "./JoinGameScreen"
 import mainbackground from "../static/background.jpg"
 import ImageResizeMode from "react-native/Libraries/Image/ImageResizeMode"
 import logo from "../static/pencil.png"
-import { TouchableOpacity } from "react-native-gesture-handler"
 
 export const MainBackground = styled.ImageBackground`
   display: flex;
@@ -28,7 +27,7 @@ const MenuRoot = styled.View`
   justify-content: center;
   align-items: center;
 `
-export const ButtonContainer = styled.View<{ bigger?: boolean }>`
+const ButtonContainer = styled.View<{ bigger?: boolean }>`
   display: flex;
   justify-content: space-between;
   width:${p => (p.bigger ? "50%" : "50%")}

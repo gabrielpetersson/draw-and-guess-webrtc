@@ -6,8 +6,9 @@ import {
   TouchableWithoutFeedback
 } from "react-native"
 import styled from "styled-components/native"
-import { Game } from "../../shared"
+import { Game, Player } from "../../shared"
 import { LineHandler, Point } from "../lib/useLines"
+import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 import { GameContent } from "./GameContent"
 import { Spacer } from "./Spacer"
 
@@ -22,22 +23,23 @@ const Players = styled.View`
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 40px;
+  height: 50px;
   justify-content: space-evenly;
   align-items: center;
+  padding: 5px 0 10px 0;
 `
 const PlayerContainer = styled.View`
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  height: 60%;
+  height: 100%;
   width: 20%;
 `
 const PlayerName = styled.Text`
   color: white;
 `
-const Message = styled.Text`
+const Guess = styled.Text`
   position: absolute;
   left: 0;
   background-color: white;
@@ -53,6 +55,7 @@ const GuessingContainer = styled.View`
   flex-direction: row;
   border-top-color: black;
   border-top-width: 1px;
+  justify-content: flex-end;
 `
 const LeaveButton = styled.View`
   background-color: red;
@@ -100,6 +103,22 @@ const HeaderRow = styled.View`
   justify-content: center;
   flex-direction: row;
 `
+
+const getPlayerColor = (player: Player, game: Game) => {
+  if (!player.isReady) return "red"
+  if (game.currentTurn?.correctGuessPlayerIds.includes(player.id))
+    return "#15c573"
+  if (player.id === game.currentTurn?.painterPlayerId) return "blue"
+  return "white"
+}
+const getPlayerBorderColor = (player: Player, game: Game) => {
+  if (!player.isReady) return "white"
+  if (game.currentTurn?.correctGuessPlayerIds.includes(player.id))
+    return "white"
+  if (player.id === game.currentTurn?.painterPlayerId) return "white"
+  return "#15c573"
+}
+
 interface ChatUserComponentProps {
   game: Game
   makeGuess: (guess: string) => void
@@ -108,7 +127,7 @@ interface ChatUserComponentProps {
   localPlayerId: string
   markPainterAsReady: () => void
   lineHandler: LineHandler
-  sendPoint: (p: Point) => void
+  webRTCLineHandler: IWebRTCLineHandler
 }
 export const GameScreen = ({
   game,
@@ -118,7 +137,7 @@ export const GameScreen = ({
   localPlayerId,
   markPainterAsReady,
   lineHandler,
-  sendPoint
+  webRTCLineHandler
 }: ChatUserComponentProps) => {
   const [guess, setGuess] = React.useState("")
   const [messageFades, setMessageFades] = React.useState<
@@ -174,7 +193,7 @@ export const GameScreen = ({
         localPlayerId={localPlayerId}
         game={game}
         lineHandler={lineHandler}
-        sendPoint={sendPoint}
+        webRTCLineHandler={webRTCLineHandler}
       />
       <GameFooter>
         <Players>
@@ -182,7 +201,11 @@ export const GameScreen = ({
             return (
               <PlayerContainer
                 key={userId}
-                style={{ backgroundColor: player.isReady ? "#15c573" : "red" }}
+                style={{
+                  backgroundColor: getPlayerColor(player, game),
+                  borderColor: getPlayerBorderColor(player, game),
+                  borderWidth: 1
+                }}
               >
                 {[...player.guesses].reverse().map((guess, i) => {
                   const isAnimationExisting = !!messageFades[guess.id]
@@ -207,31 +230,35 @@ export const GameScreen = ({
                       }}
                       key={guess.id}
                     >
-                      <Message>{guess.text}</Message>
+                      <Guess>{guess.text}</Guess>
                     </Animated.View>
                   )
                 })}
-                <PlayerName>{`${player.name}: ${player.points}`}</PlayerName>
+                <PlayerName
+                  style={{ color: getPlayerBorderColor(player, game) }}
+                >{`${player.name}: ${player.points}`}</PlayerName>
               </PlayerContainer>
             )
           })}
         </Players>
         <GuessingContainer>
-          <TextInput
-            placeholderTextColor="black"
-            placeholder="Guess.."
-            defaultValue={guess}
-            onChangeText={(text: string) => text}
-            blurOnSubmit={false}
-            onSubmitEditing={() => {
-              if (!guess) return
-              makeGuess(guess)
-              setGuess("")
-            }}
-            style={{
-              flex: 1
-            }}
-          />
+          {isPainter ? null : (
+            <TextInput
+              placeholderTextColor="black"
+              placeholder="Guess.."
+              defaultValue={guess}
+              onChangeText={(text: string) => setGuess(text)}
+              blurOnSubmit={false}
+              onSubmitEditing={() => {
+                if (!guess) return
+                makeGuess(guess)
+                setGuess("")
+              }}
+              style={{
+                flex: 1
+              }}
+            />
+          )}
           <TouchableWithoutFeedback onPress={leaveGame}>
             <LeaveButton>
               <LeaveText>Leave</LeaveText>

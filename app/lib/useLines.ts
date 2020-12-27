@@ -20,7 +20,7 @@ export const useLines = (): LineHandler => {
   const addNewPoint = React.useCallback((point: Point) => {
     setLines(lines => [
       ...lines.slice(0, lines.length - 1),
-      [...lines[lines.length - 1], point]
+      [...(lines.length ? lines[lines.length - 1] : []), point]
     ])
   }, [])
   const endLine = React.useCallback(() => {}, [])

@@ -6,7 +6,10 @@ import {
   PanResponderInstance
 } from "react-native"
 import Canvas from "react-native-canvas"
+import { createNativeWrapper } from "react-native-gesture-handler"
+import { getCanvasSize } from "../lib/canvasSize"
 import { Line, LineHandler, Point, useLines } from "../lib/useLines"
+import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 
 const createPanResponder = ({
   endLine,
@@ -18,13 +21,13 @@ const createPanResponder = ({
   addNewPoint: (point: Point) => void
 }) => {
   return PanResponder.create({
-    onMoveShouldSetPanResponder: () => {
+    onMoveShouldSetPanResponder: (e, gest) => {
       return true
     },
     onPanResponderGrant: e => {
       createNewLine()
     },
-    onPanResponderMove: e => {
+    onPanResponderMove: (e, gest) => {
       addNewPoint({ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY })
     },
     onPanResponderRelease: (_, gest) => {
@@ -66,12 +69,12 @@ export const drawLinesToCanvas = ({
 
 interface GameCanvaProps {
   lineHandler: LineHandler
-  sendPoint: (p: Point) => void
+  webRTCLineHandler: IWebRTCLineHandler
   isPainter: boolean
 }
 export const GameCanvas = ({
   lineHandler,
-  sendPoint,
+  webRTCLineHandler,
   isPainter
 }: GameCanvaProps) => {
   const [canvas, setCanvas] = React.useState<Canvas | null>(null)
@@ -81,16 +84,18 @@ export const GameCanvas = ({
   ] = React.useState<PanResponderInstance | null>(null)
 
   const { endLine, createNewLine, addNewPoint, lines } = lineHandler
-
   React.useEffect(() => {
     if (!isPainter) return // only allow for current painter to paint
     setPanResponder(
       createPanResponder({
         endLine,
-        createNewLine,
+        createNewLine: () => {
+          createNewLine()
+          webRTCLineHandler.sendNewLine()
+        },
         addNewPoint: (p: Point) => {
           addNewPoint(p)
-          sendPoint(p)
+          webRTCLineHandler.sendPoint(p)
         }
       })
     )
@@ -101,12 +106,13 @@ export const GameCanvas = ({
     drawLinesToCanvas({ canvas, lines })
   }, [lines, canvas])
 
+  const canvasSize = getCanvasSize()
   return (
     <Animated.View
       {...panResponder?.panHandlers}
       style={{
-        width: Dimensions.get("window").width,
-        height: Dimensions.get("window").width
+        width: canvasSize,
+        height: canvasSize
       }}
       // pointerEvents="none"
     >
@@ -118,12 +124,12 @@ export const GameCanvas = ({
           borderColor: isPainter ? "#15c573" : "transparent"
         }}
         // @ts-ignore - width and height indeed does exist here.
-        width={Dimensions.get("window").width}
-        height={Dimensions.get("window").width}
+        width={canvasSize}
+        height={canvasSize}
         ref={(c: Canvas) => {
           if (!c || canvas) return
-          c.width = Dimensions.get("window").width
-          c.height = Dimensions.get("window").height
+          c.width = canvasSize
+          c.height = canvasSize
           setCanvas(c)
         }}
       />

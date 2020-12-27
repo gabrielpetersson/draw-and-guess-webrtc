@@ -1,11 +1,17 @@
 import React from "react"
 import styled from "styled-components/native"
-import { ButtonContainer } from "./MenuScreen"
 
 export enum StartGameTypes {
   join = "join",
   create = "create"
 }
+
+const ButtonContainer = styled.View<{ bigger?: boolean }>`
+  display: flex;
+  justify-content: space-between;
+  width:${p => (p.bigger ? "50%" : "50%")}
+  height: ${p => (p.bigger ? "30%" : "15%")};
+`
 
 const JoinButton = styled.Button`
   display: flex;

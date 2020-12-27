@@ -1,30 +1,29 @@
 import React from "react"
-import { Dimensions, Text, TouchableWithoutFeedback } from "react-native"
+import { Text, TouchableWithoutFeedback } from "react-native"
 import styled from "styled-components/native"
 import { Game } from "../../shared"
+import { getCanvasSize } from "../lib/canvasSize"
 import { LineHandler, Point } from "../lib/useLines"
+import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 import { GameCanvas as GameCanva } from "./GameCanvass"
 
 const GameContentWrapper = styled.View`
   align-items: center;
   align-self: center;
   justify-content: center;
-  width: ${Dimensions.get("screen").width}px;
-  height: ${Dimensions.get("screen").width}px;
+  width: 100%;
+  height: ${getCanvasSize()}px;
 `
-
 const ReadyButton = styled.View`
   background-color: #15c573;
   color: white;
   font-size: 24px;
   font-weight: 900;
-  width: 100px;
-  height: 36px;
+  padding: 10px 25px;
   justify-content: center;
   align-items: center;
   border-radius: 4px;
 `
-
 const PaintText = styled.Text`
   color: white;
 `
@@ -33,20 +32,21 @@ const PaintReadyButton = styled.View`
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  width: 100px;
-  height: 36px;
+  padding: 10px 25px;
 `
 const WhatToPaintContainer = styled.View`
   width: 300px;
-  height: 180px;
+  height: 200px;
   border-width: 1px;
+  padding: 20px;
   border-color: rgba(0, 0, 0, 0.5);
   border-radius: 4px;
-  justify-content: space-evenly;
+  justify-content: space-around;
   align-items: center;
 `
 const WhatToPaintText = styled.Text`
   color: black;
+  text-align: center;
 `
 const isLocalPlayerReady = (game: Game, localPlayerId: string) =>
   Object.values(game.participants).some(
@@ -61,7 +61,7 @@ interface GameContentProps {
   localPlayerId: string
   game: Game
   lineHandler: LineHandler
-  sendPoint: (p: Point) => void
+  webRTCLineHandler: IWebRTCLineHandler
 }
 export const GameContent = ({
   markAsReady,
@@ -69,7 +69,7 @@ export const GameContent = ({
   localPlayerId,
   game,
   lineHandler,
-  sendPoint
+  webRTCLineHandler
 }: GameContentProps) => {
   let content: React.ReactNode
   const isReady = isLocalPlayerReady(game, localPlayerId)
@@ -83,10 +83,43 @@ export const GameContent = ({
         </ReadyButton>
       </TouchableWithoutFeedback>
     )
+  } else if (game.currentTurn?.status === "ENDED") {
+    const nCorrectGuesses = game.currentTurn.correctGuessPlayerIds.length
+    const allGotItRight =
+      nCorrectGuesses >= Object.values(game.participants).length - 1
+    const guessedCorrect = game.currentTurn.correctGuessPlayerIds.includes(
+      localPlayerId
+    )
+    let roundOverText
+    if (isPainter && nCorrectGuesses === 0) {
+      roundOverText =
+        "Nobody got your drawing right. Maybe drawing is not for you!"
+    } else if (isPainter && allGotItRight) {
+      roundOverText = "Are you the next Picasso?! Everyone got it right!"
+    } else if (isPainter) {
+      roundOverText = "Great job! At least a few got your drawing right."
+    } else if (guessedCorrect) {
+      roundOverText = "Guessing is over. Great job! You got a point."
+    } else {
+      roundOverText = "Too bad, you ran out of time :( No points this time!"
+    }
+    content = (
+      <WhatToPaintContainer>
+        <WhatToPaintText>{roundOverText}</WhatToPaintText>
+        {nCorrectGuesses > 2 || (nCorrectGuesses > 1 && !guessedCorrect) ? (
+          <WhatToPaintText>{`These people got it right: ${game.currentTurn.correctGuessPlayerIds
+            .map(id => {
+              Object.values(game.participants).find(p => p.id === id)?.name
+            })
+            .filter(Boolean)
+            .join(", ")}`}</WhatToPaintText>
+        ) : null}
+      </WhatToPaintContainer>
+    )
   } else if (!isPaineterReady && isPainter) {
     content = (
       <WhatToPaintContainer>
-        <WhatToPaintText>{`You got the honor to paint: ${game.currentTurn?.painterWord}`}</WhatToPaintText>
+        <WhatToPaintText>{`Your turn to draw! Draw a ${game.currentTurn?.painterWord}`}</WhatToPaintText>
         <TouchableWithoutFeedback onPress={markPainterAsReady}>
           <PaintReadyButton>
             <PaintText>Paint the word!</PaintText>
@@ -94,12 +127,26 @@ export const GameContent = ({
         </TouchableWithoutFeedback>
       </WhatToPaintContainer>
     )
+  } else if (!isPaineterReady) {
+    content = (
+      <WhatToPaintContainer>
+        <WhatToPaintText>
+          {game.currentTurn?.painterPlayerId
+            ? `Waiting for ${
+                Object.values(game.participants).find(
+                  p => p.id === game.currentTurn?.painterPlayerId
+                )?.name
+              } to start painting...`
+            : "Waiting until all players are ready"}
+        </WhatToPaintText>
+      </WhatToPaintContainer>
+    )
   } else
     content = (
       <GameCanva
         isPainter={isPainter}
         lineHandler={lineHandler}
-        sendPoint={sendPoint}
+        webRTCLineHandler={webRTCLineHandler}
       />
     )
   return <GameContentWrapper>{content}</GameContentWrapper>
