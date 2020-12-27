@@ -7,14 +7,8 @@ import {
 } from "react-native"
 import styled from "styled-components/native"
 import { Game, Player } from "../../shared"
-import {
-  DARK_GREEN,
-  LIGHT_BLUE,
-  LIGHT_GREEN,
-  UGLY_BLUE,
-  VERY_COOL_PURPLE
-} from "../lib/constants"
-import { LineHandler, Point } from "../lib/useLines"
+import { DARK_GREEN, LIGHT_BLUE, VERY_COOL_PURPLE } from "../lib/constants"
+import { LineHandler } from "../lib/useLines"
 import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 import { GameContent } from "./GameContent"
 import { Spacer } from "./Spacer"
@@ -85,17 +79,8 @@ const GameHeader = styled.View`
   justify-content: center;
   align-items: center;
   border-bottom-color: gray;
-  border-bottom-width: 3px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-
-  background-color: white;
-  color: white;
-  top: 20px;
-
-  border-bottom-color: rgba(0, 0, 0, 0.4);
   border-bottom-width: 1px;
-
+  background-color: white;
   top: 0;
   width: 100%;
   padding: 20px;
@@ -112,7 +97,7 @@ const GameFooter = styled.View`
   bottom: 0;
   left: 0;
   width: 100%;
-  z-index: 10000000000000;
+  z-index: 1000;
 `
 const HeaderRow = styled.View`
   width: 100%;
@@ -166,7 +151,7 @@ export const GameScreen = ({
       delay: 4000,
       toValue: 0,
       duration: 3000,
-      useNativeDriver: false
+      useNativeDriver: true
     }).start()
   }
   const isPainter = localPlayerId === game.currentTurn?.painterPlayerId

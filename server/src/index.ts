@@ -12,6 +12,7 @@ import {
   Player,
   GameTurn
 } from "../../shared"
+import { GameTurnStatuses } from "./types"
 
 const words = [
   "tree",
@@ -29,21 +30,17 @@ const words = [
   "bee",
   "dog"
 ]
+
 const app = express()
 const server = new http.Server(app)
 const io = new SocketIO.Server(server)
 const PORT = process.env.PORT || 8000
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.send("connectd")
 })
-
 server.listen(PORT, () => console.log(`Server is running on port ${PORT}`))
 
-enum GameTurnStatuses {
-  ENDED = "ENDED",
-  ACTIVE = "ACTIVE"
-}
 const createUser = (id: string, name: string): Player => ({
   id,
   name,
@@ -75,12 +72,14 @@ const createTurn = (game: Game): GameTurn => ({
   correctGuessPlayerIds: [],
   status: GameTurnStatuses.ACTIVE
 })
+
 const checkEveryoneReady = (game: Game) => {
   return (
     Object.values(game.participants).every(p => p.isReady) &&
     Object.values(game.participants).length > 1
   )
 }
+
 let games: Games = {}
 let userToGame: Record<string, string> = {}
 
@@ -95,27 +94,6 @@ io.on("connection", (socket: SocketIO.Socket) => {
     if (checkGameExist()) delete getGame().participants[socket.id]
     delete userToGame[socket.id]
   }
-
-  // ----------------- WEBRTC STARTS -----------------
-  socket.on("webrtcOffer", (id: string, message: string) => {
-    socket.to(id).emit("webrtcOffer", socket.id, message)
-  })
-  socket.on("webrtcAnswer", (id: string, message: string) => {
-    socket.to(id).emit("webrtcAnswer", socket.id, message)
-  })
-  socket.on("webrtcDisconnectSelf", () => {
-    broadcastToRoom("disconnectPeer", socket.id)
-    disconnectUser()
-    emitGame()
-  })
-  socket.on("candidate", (id: string, message: string) => {
-    socket.to(id).emit("candidate", socket.id, message)
-  })
-  socket.on("comment", (id: string, message: string) => {
-    socket.to(id).emit("comment", socket.id, message)
-  })
-  // ----------------- WEBRTC ENDS ------------------
-
   const sendError = (error: string) => socket.emit("error", error)
   const checkGameExist = () => {
     const gameName = getGameName()
@@ -151,8 +129,34 @@ io.on("connection", (socket: SocketIO.Socket) => {
     const game = getGame()
     if (guess && game.currentTurn?.correctGuessPlayerIds.includes(socket.id))
       return
-    return guess === game.currentTurn?.painterWord
+    return (
+      guess.toLocaleLowerCase().trim() ===
+      game.currentTurn?.painterWord.toLocaleLowerCase().trim()
+    )
   }
+
+  socket.on("webrtcOffer", (id: string, message: string) => {
+    socket.to(id).emit("webrtcOffer", socket.id, message)
+  })
+
+  socket.on("webrtcAnswer", (id: string, message: string) => {
+    socket.to(id).emit("webrtcAnswer", socket.id, message)
+  })
+
+  socket.on("webrtcDisconnectSelf", () => {
+    broadcastToRoom("disconnectPeer", socket.id)
+    disconnectUser()
+    emitGame()
+  })
+
+  socket.on("candidate", (id: string, message: string) => {
+    socket.to(id).emit("candidate", socket.id, message)
+  })
+
+  socket.on("comment", (id: string, message: string) => {
+    socket.to(id).emit("comment", socket.id, message)
+  })
+
   socket.on("makeGuess", (guess: string) => {
     const game = getGame()
     if (!game.currentTurn) return
@@ -165,7 +169,6 @@ io.on("connection", (socket: SocketIO.Socket) => {
         game.currentTurn.correctGuessPlayerIds.length >=
         Object.values(game.participants).length - 1
       ) {
-        // io.sockets.emit("roundOver", game.currentTurn?.correctGuessPlayerIds)
         game.currentTurn.status = GameTurnStatuses.ENDED
       }
       emitGame()
@@ -183,8 +186,11 @@ io.on("connection", (socket: SocketIO.Socket) => {
     })
     emitGame()
   })
+
   socket.on("leaveGame", disconnectUser)
+
   socket.on("disconnect", disconnectUser)
+
   socket.on("markAsReady", () => {
     const game = getGame()
     getPlayer().isReady = true
@@ -192,6 +198,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     if (shouldGameStart) game.currentTurn = createTurn(game)
     emitGame()
   })
+
   socket.on("markPainterAsReady", () => {
     const game = getGame()
     if (!game.currentTurn) {
@@ -202,6 +209,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     game.currentTurn.status = GameTurnStatuses.ACTIVE
     emitGame()
   })
+
   socket.on("createGame", (opts: CreateGameOptions) => {
     if (games[opts.gameName]) {
       sendError("Game already exists")
@@ -221,6 +229,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     socket.emit("playerId", socket.id)
     emitGame()
   })
+
   socket.on("joinGame", (opts: JoinGameOptions) => {
     if (!games[opts.gameName]) {
       sendError("Game does not exist")
@@ -243,8 +252,8 @@ io.on("connection", (socket: SocketIO.Socket) => {
   })
 
   socket.emit("leaveGame") // for server restarts
+
   socket.onAny(e => {
     console.info("[server event]", e)
-    // console.info("[current game]", getGame())
   })
 })

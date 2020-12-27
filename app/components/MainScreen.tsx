@@ -1,6 +1,4 @@
 import React from "react"
-import { Text } from "react-native"
-
 import styled from "styled-components/native"
 import { MenuScreen } from "./MenuScreen"
 import { GameScreen } from "./GameScreen.tsx"
@@ -19,8 +17,8 @@ const ErrorText = styled.Text`
   left: 10px;
   z-index: 1000000;
 `
-
 export const MainScreen = () => {
+  // todo split this thing
   const {
     game,
     createGame,

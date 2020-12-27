@@ -1,24 +1,18 @@
 import React from "react"
 import { Text } from "react-native"
 import styled from "styled-components/native"
-import {
-  LIGHT_GREEN,
-  THIS_COLOR_IS_DOPE,
-  VERY_COOL_PURPLE
-} from "../lib/constants"
+import { VERY_COOL_PURPLE } from "../lib/constants"
 import { Spacer } from "./Spacer"
 
 export enum StartGameTypes {
   join = "join",
   create = "create"
 }
-
 const ButtonContainer = styled.View`
   display: flex;
   justify-content: center;
   width: 40%;
 `
-
 const GameInput = styled.TextInput`
   background-color: white;
   border-radius: 4px;
@@ -42,13 +36,13 @@ const LowerButtonContainer = styled.View`
   height: 36px;
   width: 100%;
 `
+
 interface CreateScreenProps {
   createGame: (gameName: string, playerName: string) => void
   joinGame: (gameName: string, playerName: string) => void
   startGameType: StartGameTypes
   goBack: () => void
 }
-
 export const JoinGameScreen = ({
   createGame,
   joinGame,
@@ -60,7 +54,7 @@ export const JoinGameScreen = ({
   return (
     <ButtonContainer>
       <GameInput
-        onChangeText={text => text.length < 10 && setPlayerName(text)}
+        onChangeText={(text: string) => text.length < 10 && setPlayerName(text)}
         placeholder="Your name"
         value={playerName}
         placeholderTextColor={"#999"}
@@ -69,14 +63,12 @@ export const JoinGameScreen = ({
       <GameInput
         placeholder="Game name"
         placeholderTextColor={"#999"}
-        onChangeText={text => text.length < 10 && setGameName(text)}
+        onChangeText={(text: string) => text.length < 10 && setGameName(text)}
         value={gameName}
       ></GameInput>
       <Spacer height={30} />
       <LowerButtonContainer>
         <NavigationButton
-          // color={LIGHT_GREEN}
-          // disabled={!playerName || !gameName}
           style={{ width: "60%", backgroundColor: VERY_COOL_PURPLE }}
           onPress={() => {
             if (startGameType === StartGameTypes.join)
@@ -85,24 +77,20 @@ export const JoinGameScreen = ({
               createGame(gameName, playerName)
           }}
         >
-          <Text style={{ color: "white", fontWeight: "bold" }}>
+          <Text style={{ color: "white" }}>
             {startGameType === StartGameTypes.join
               ? "Join room"
               : "Create room"}
           </Text>
         </NavigationButton>
-        {/* <Spacer width={30} /> */}
         <NavigationButton
           style={{
             width: "30%",
-            backgroundColor: VERY_COOL_PURPLE,
-            // borderWidth: 1,
-            // borderColor: "#6680FF",
-            boxSizing: "border-box"
+            backgroundColor: VERY_COOL_PURPLE
           }}
           onPress={goBack}
         >
-          <Text style={{ color: "white", fontWeight: "bold" }}> Back </Text>
+          <Text style={{ color: "white" }}> Back </Text>
         </NavigationButton>
       </LowerButtonContainer>
     </ButtonContainer>

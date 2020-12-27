@@ -21,10 +21,10 @@ const createPanResponder = ({
     onPanResponderGrant: () => {
       createNewLine()
     },
-    onPanResponderMove: (e, gest) => {
+    onPanResponderMove: e => {
       addNewPoint({ x: e.nativeEvent.locationX, y: e.nativeEvent.locationY })
     },
-    onPanResponderRelease: (_, gest) => {
+    onPanResponderRelease: () => {
       endLine()
     }
   })
@@ -108,7 +108,6 @@ export const GameCanvas = ({
         width: canvasSize,
         height: canvasSize
       }}
-      // pointerEvents="none"
     >
       <Canvas
         style={{

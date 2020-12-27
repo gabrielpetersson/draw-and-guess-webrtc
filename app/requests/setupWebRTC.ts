@@ -83,11 +83,11 @@ export const useWebRTC = () => {
       console.log("connected")
 
       socket.on("webrtcWatcher", async (id: string) => {
-        console.log("webrtcWatcher###############################", id)
+        console.log("watcher", id)
         const prevPeer = peerConnections.current.get(id)
         if (prevPeer?.signalingState === "stable") {
           console.log("watcher on established con")
-          // return
+          return
         }
         const localConnection = new RTCPeerConnection(config)
         const dataChannel = (localConnection.createDataChannel(
@@ -203,7 +203,7 @@ export const useWebRTC = () => {
 
       socket.on("disconnect", () => {
         console.log("diconnected")
-        // socket.off()
+        socket.off()
         setGame(null)
       })
 

@@ -3,10 +3,10 @@ import { Text, TouchableWithoutFeedback } from "react-native"
 import styled from "styled-components/native"
 import { Game } from "../../shared"
 import { getCanvasSize } from "../lib/canvasSize"
-import { LIGHT_GREEN, VERY_COOL_PURPLE } from "../lib/constants"
-import { LineHandler, Point } from "../lib/useLines"
+import { DARK_GREEN, VERY_COOL_PURPLE } from "../lib/constants"
+import { LineHandler } from "../lib/useLines"
 import { IWebRTCLineHandler } from "../requests/setupWebRTC"
-import { GameCanvas as GameCanva } from "./GameCanvass"
+import { GameCanvas } from "./GameCanvas"
 
 const GameContentWrapper = styled.View`
   align-items: center;
@@ -27,7 +27,7 @@ const PaintText = styled.Text`
   color: white;
 `
 const PaintReadyButton = styled.View`
-  background-color: #15c573;
+  background-color: ${DARK_GREEN};
   align-items: center;
   justify-content: center;
   border-radius: 4px;
@@ -143,7 +143,7 @@ export const GameContent = ({
     )
   } else
     content = (
-      <GameCanva
+      <GameCanvas
         isPainter={isPainter}
         lineHandler={lineHandler}
         webRTCLineHandler={webRTCLineHandler}
