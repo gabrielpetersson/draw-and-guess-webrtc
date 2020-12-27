@@ -19,7 +19,7 @@
       "android": "yarn workspace app android",
       "be:dev": "yarn workspace server start:dev",
       "build": "yarn workspace server build",
-      "dstart": "yarn build && yarn workspace server start"
+      "start": "yarn workspace server build && yarn workspace server start"
     },
     "browserslist": {
       "production": [
