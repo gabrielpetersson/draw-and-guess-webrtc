@@ -3,7 +3,7 @@ export interface Guess {
   text: string
 }
 
-export interface User {
+export interface Player {
   id: string
   name: string
   points: number
@@ -16,13 +16,15 @@ export interface GameTurn {
   isPainterReady: boolean
   painterWord: string
   correctGuessPlayerIds: string[]
+  status: "ENDED" | "ACTIVE" // not a type due some transpilation bugs
 }
 
 export interface Game {
   owner: string
   name: string
-  participants: Record<string, User>
+  participants: Record<string, Player>
   currentTurn?: GameTurn
+  painterIdHistory: string[]
 }
 
 export interface CreateGameOptions {

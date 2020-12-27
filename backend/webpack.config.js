@@ -19,6 +19,11 @@ module.exports = {
             test: /\.(ts)?$/,
             exclude: /node_modules/,
             include: path.resolve(__dirname, 'src'),
-        }]
+        },  {
+            test: /\.(ts)?$/,
+            loader: 'babel-loader',
+            include: path.resolve(__dirname, '../shared'),
+            
+          }]
     }
 }
