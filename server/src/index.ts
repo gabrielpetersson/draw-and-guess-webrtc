@@ -32,13 +32,13 @@ const words = [
 const app = express()
 const server = new http.Server(app)
 const io = new SocketIO.Server(server)
-const port = 8000
+const PORT = process.env.PORT || 3000
 
 app.get("/", (req, res) => {
   res.send("connectd")
 })
 
-server.listen(port, () => console.log(`Server is running on port ${port}`))
+server.listen(PORT, () => console.log(`Server is running on port ${PORT}`))
 
 enum GameTurnStatuses {
   ENDED = "ENDED",
