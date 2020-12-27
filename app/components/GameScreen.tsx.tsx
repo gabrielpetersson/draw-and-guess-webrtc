@@ -17,7 +17,7 @@ const GameRoot = styled.View`
   width: 100%;
   height: 100%;
   justify-content: flex-end;
-  background-color: white;
+  background-color: #32324d;
 `
 const Players = styled.View`
   display: flex;
@@ -37,7 +37,7 @@ const PlayerContainer = styled.View`
   width: 20%;
 `
 const PlayerName = styled.Text`
-  color: white;
+  color: black;
 `
 const Guess = styled.Text`
   position: absolute;
@@ -53,9 +53,12 @@ const GuessingContainer = styled.View`
   width: 100%;
   padding: 10px 30px;
   flex-direction: row;
-  border-top-color: black;
-  border-top-width: 1px;
   justify-content: flex-end;
+  border-top-color: gray;
+  border-top-width: 3px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  background-color: #636380;
 `
 const LeaveButton = styled.View`
   background-color: red;
@@ -75,9 +78,19 @@ const GameHeader = styled.View`
   position: absolute;
   justify-content: center;
   align-items: center;
+  border-bottom-color: gray;
+  border-bottom-width: 3px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+  background-color: #636380;
+  color: white;
+  top: 20px;
+
   background-color: rgba(0, 0, 0, 0.02);
   border-bottom-color: rgba(0, 0, 0, 0.4);
   border-bottom-width: 1px;
+
   left: 0;
   top: 0;
   width: 100%;
@@ -140,6 +153,7 @@ export const GameScreen = ({
   webRTCLineHandler
 }: ChatUserComponentProps) => {
   const [guess, setGuess] = React.useState("")
+  const [userNumber, setUserNumber] = React.useState(0)
   const [messageFades, setMessageFades] = React.useState<
     Record<string, Animated.Value>
   >({})
@@ -197,7 +211,7 @@ export const GameScreen = ({
       />
       <GameFooter>
         <Players>
-          {Object.entries(game.participants).map(([userId, player]) => {
+          {Object.entries(game.participants).map(([userId, player], index) => {
             return (
               <PlayerContainer
                 key={userId}

@@ -84,6 +84,11 @@ export const useWebRTC = () => {
 
       socket.on("webrtcWatcher", async (id: string) => {
         console.log("webrtcWatcher###############################", id)
+        const prevPeer = peerConnections.current.get(id)
+        if (prevPeer?.signalingState === "stable") {
+          console.log("watcher on established con")
+          // return
+        }
         const localConnection = new RTCPeerConnection(config)
         const dataChannel = (localConnection.createDataChannel(
           "text"
@@ -120,6 +125,12 @@ export const useWebRTC = () => {
         "webrtcOffer",
         async (id: string, offer: RTCSessionDescriptionType) => {
           console.log("GOT OFFEEEEEEEEEEEEEEEEEEEEEEEEEEER")
+          const prevPeer = peerConnections.current.get(id)
+          if (prevPeer?.signalingState === "stable") {
+            console.log("offer on established con")
+            // return
+          }
+
           const localConnection = new RTCPeerConnection(config)
 
           localConnection.onicecandidate = ({ candidate }) => {
@@ -135,7 +146,9 @@ export const useWebRTC = () => {
             channel.onopen = () => setDataChannel(channel)
           }
 
-          await localConnection.setRemoteDescription(offer)
+          if (localConnection.signalingState === "stable")
+            //return
+            await localConnection.setRemoteDescription(offer)
           const localDescription = await localConnection.createAnswer()
           await localConnection.setLocalDescription(localDescription)
           socket.emit("webrtcAnswer", id, localDescription)
@@ -156,7 +169,12 @@ export const useWebRTC = () => {
             console.error("Did not find peer")
             return
           }
+          if (localConnection.signalingState === "stable") {
+            console.error("trying to reestablish already successful connection")
+            // return
+          }
           console.log("[REMOTE DESC STATE]", localConnection.signalingState)
+
           localConnection.setRemoteDescription(remoteOfferDescription)
         }
       )
@@ -182,7 +200,11 @@ export const useWebRTC = () => {
         setError(error)
         setTimeout(() => setError(""), 5000) // quickfix, should be removed on actions instead
       })
-      socket.on("disconnect", () => setGame(null))
+      socket.on("disconnect", () => {
+        console.log("diconnected")
+        socket.off()
+        setGame(null)
+      })
       socket.on("playerId", setLocalPlayerId)
       socket.onAny(e => console.log("[event]", e))
     })
