@@ -1,42 +1,43 @@
 import React from "react"
+import { Text } from "react-native"
 import styled from "styled-components/native"
+import { LIGHT_GREEN, THIS_COLOR_IS_DOPE } from "../lib/constants"
+import { Spacer } from "./Spacer"
 
 export enum StartGameTypes {
   join = "join",
   create = "create"
 }
 
-const ButtonContainer = styled.View<{ bigger?: boolean }>`
+const ButtonContainer = styled.View`
   display: flex;
-  justify-content: space-between;
-  width:${p => (p.bigger ? "50%" : "50%")}
-  height: ${p => (p.bigger ? "30%" : "15%")};
+  justify-content: center;
+  width: 140px;
 `
 
-const JoinButton = styled.Button`
-  display: flex;
-
-  color: pink;
-`
-const GoBackButton = styled.Button`
-  display: flex;
-`
-
-const InputFıelds = styled.TextInput`
-  border: 1px;
+const GameInput = styled.TextInput`
   background-color: white;
-
-  border-radius: 0.5px;
-  padding: 5px;
-  color: green;
+  border-radius: 4px;
+  width: 100%;
+  padding: 5px 10px;
+  color: black;
   font-weight: bold;
 `
-const TypeOfGamesContainer = styled.View`
-  display: flex;
-  background-color: black;
-  height: 50%;
+const NavigationButton = styled.TouchableOpacity`
+  font-weight: bold;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 4px;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
 `
-
+const LowerButtonContainer = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  height: 36px;
+  width: 100%;
+`
 interface CreateScreenProps {
   createGame: (gameName: string, playerName: string) => void
   joinGame: (gameName: string, playerName: string) => void
@@ -53,39 +54,53 @@ export const JoinGameScreen = ({
   const [playerName, setPlayerName] = React.useState("gab")
   const [gameName, setGameName] = React.useState("roomName")
   return (
-    <ButtonContainer bigger>
-      <InputFıelds
+    <ButtonContainer>
+      <GameInput
         onChangeText={text => text.length < 10 && setPlayerName(text)}
         placeholder="Your name"
-        defaultValue={playerName}
-      ></InputFıelds>
-      <InputFıelds
+        value={playerName}
+        placeholderTextColor={"#999"}
+      ></GameInput>
+      <Spacer height={30} />
+      <GameInput
         placeholder="Game name"
-        onChangeText={text =>
-          text.length < 10 && setGameName(text.toLowerCase().replace(" ", ""))
-        }
+        placeholderTextColor={"#999"}
+        onChangeText={text => text.length < 10 && setGameName(text)}
         value={gameName}
-      ></InputFıelds>
-      <JoinButton
-        color="green"
-        title={
-          startGameType === StartGameTypes.join ? "Join room" : "Create room"
-        }
-        disabled={!playerName || !gameName}
-        onPress={() => {
-          if (startGameType === StartGameTypes.join)
-            joinGame(gameName, playerName)
-          else if (startGameType === StartGameTypes.create)
-            createGame(gameName, playerName)
-        }}
-      ></JoinButton>
-      <GoBackButton
-        color="red"
-        title={"Go back"}
-        onPress={() => {
-          goBack()
-        }}
-      ></GoBackButton>
+      ></GameInput>
+      <Spacer height={30} />
+      <LowerButtonContainer>
+        <NavigationButton
+          // color={LIGHT_GREEN}
+          // disabled={!playerName || !gameName}
+          style={{ width: "60%", backgroundColor: "#6680FF" }}
+          onPress={() => {
+            if (startGameType === StartGameTypes.join)
+              joinGame(gameName, playerName)
+            else if (startGameType === StartGameTypes.create)
+              createGame(gameName, playerName)
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "bold" }}>
+            {startGameType === StartGameTypes.join
+              ? "Join room"
+              : "Create room"}
+          </Text>
+        </NavigationButton>
+        {/* <Spacer width={30} /> */}
+        <NavigationButton
+          style={{
+            width: "30%",
+            backgroundColor: "#6680FF",
+            // borderWidth: 1,
+            // borderColor: "#6680FF",
+            boxSizing: "border-box"
+          }}
+          onPress={goBack}
+        >
+          <Text style={{ color: "white", fontWeight: "bold" }}> Back </Text>
+        </NavigationButton>
+      </LowerButtonContainer>
     </ButtonContainer>
   )
 }
