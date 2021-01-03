@@ -49,7 +49,7 @@ const getNextPainter = (game: Game) => {
   } else return Object.values(game.participants)[nextIndex].id
 }
 
-const MS_TURN = 6000
+const MS_TURN = 60000
 
 const checkEveryoneReady = (game: Game) => {
   return (
@@ -202,8 +202,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     const player = getPlayer()
     player.isReady = true
     const shouldGameStart = checkEveryoneReady(game)
-    // if (shouldGameStart)
-    game.currentTurn = createTurn(game)
+    if (shouldGameStart) game.currentTurn = createTurn(game)
     emitGame()
   })
 
