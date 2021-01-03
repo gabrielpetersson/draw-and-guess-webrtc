@@ -5,7 +5,13 @@ import { JoinGameScreen, StartGameTypes } from "./JoinGameScreen"
 import ImageResizeMode from "react-native/Libraries/Image/ImageResizeMode"
 import BigPen from "../static/pencil.png"
 import { LinearGradient } from "expo-linear-gradient"
-import { LIGHT_BLUE, UGLY_BLUE } from "../lib/constants"
+import {
+  BORDER_COLOR,
+  LIGHT_BLUE,
+  UGLY_BLUE,
+  VERY_COOL_PURPLE,
+  VERY_COOL_PURPLE_LIGHT
+} from "../lib/constants"
 import { Spacer } from "./Spacer"
 
 const LogoImage = styled.Image`
@@ -25,6 +31,8 @@ const MenuButton = styled.TouchableOpacity`
   font-weight: bold;
   align-items: center;
   background-color: #ffffff;
+  border-color: ${BORDER_COLOR};
+  border-width: 1px;
   border-radius: 4px;
   padding: 10px 60px;
 `
@@ -42,7 +50,8 @@ export const MenuScreen = ({
   ] = React.useState<StartGameTypes | null>(null)
 
   return (
-    <MenuRoot colors={[UGLY_BLUE, LIGHT_BLUE]}>
+    // <MenuRoot colors={[UGLY_BLUE, LIGHT_BLUE]}>
+    <MenuRoot colors={[VERY_COOL_PURPLE, VERY_COOL_PURPLE_LIGHT]}>
       <LogoImage
         source={BigPen}
         resizeMode={ImageResizeMode.contain}

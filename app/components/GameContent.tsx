@@ -3,10 +3,16 @@ import { Text, TouchableWithoutFeedback } from "react-native"
 import styled from "styled-components/native"
 import { Game } from "../../shared"
 import { getCanvasSize } from "../lib/canvasSize"
-import { DARK_GREEN, VERY_COOL_PURPLE } from "../lib/constants"
+import {
+  BORDER_COLOR,
+  DARK_GREEN,
+  LIGHT_GREEN,
+  VERY_COOL_PURPLE
+} from "../lib/constants"
 import { LineHandler } from "../lib/useLines"
 import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 import { GameCanvas } from "./GameCanvas"
+import { GameStatus } from "./GameScreen.tsx"
 
 const GameContentWrapper = styled.View`
   align-items: center;
@@ -16,7 +22,9 @@ const GameContentWrapper = styled.View`
   height: ${getCanvasSize()}px;
 `
 const ReadyButton = styled.View`
-  background-color: ${VERY_COOL_PURPLE};
+  background-color: ${DARK_GREEN};
+  border-width: 1px;
+  border-color: ${BORDER_COLOR};
   font-weight: 900;
   padding: 10px 25px;
   justify-content: center;
@@ -38,7 +46,7 @@ const GameUpdateContainer = styled.View`
   height: 200px;
   border-width: 1px;
   padding: 20px;
-  border-color: rgba(0, 0, 0, 0.5);
+  border-color: ${BORDER_COLOR};
   background-color: white;
   border-radius: 4px;
   justify-content: space-around;
@@ -78,12 +86,15 @@ export const GameContent = ({
   if (!isReady) {
     content = (
       <TouchableWithoutFeedback onPress={markAsReady}>
-        <ReadyButton>
+        <ReadyButton style={{ borderColor: BORDER_COLOR, borderWidth: 1 }}>
           <Text style={{ color: "white" }}>Ready?</Text>
         </ReadyButton>
       </TouchableWithoutFeedback>
     )
-  } else if (game.currentTurn?.status === "ENDED") {
+  } else if (
+    game.currentTurn?.status === GameStatus.ENDED &&
+    game.currentTurn
+  ) {
     const nCorrectGuesses = game.currentTurn.correctGuessPlayerIds.length
     const allGotItRight =
       nCorrectGuesses >= Object.values(game.participants).length - 1

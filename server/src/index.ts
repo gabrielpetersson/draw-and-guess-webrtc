@@ -13,23 +13,7 @@ import {
   GameTurn
 } from "../../shared"
 import { GameTurnStatuses } from "./types"
-
-const words = [
-  "tree",
-  "bear",
-  "potato",
-  "table",
-  "flower",
-  "apple",
-  "lamp",
-  "house",
-  "phone",
-  "candle",
-  "duck",
-  "car",
-  "bee",
-  "dog"
-]
+import { WordGenerator } from "./word-generator"
 
 const app = express()
 const server = new http.Server(app)
@@ -65,13 +49,7 @@ const getNextPainter = (game: Game) => {
   } else return Object.values(game.participants)[nextIndex].id
 }
 
-const createTurn = (game: Game): GameTurn => ({
-  painterPlayerId: getNextPainter(game),
-  isPainterReady: false,
-  painterWord: words[Math.floor(Math.random() * words.length)],
-  correctGuessPlayerIds: [],
-  status: GameTurnStatuses.ACTIVE
-})
+const MS_TURN = 6000
 
 const checkEveryoneReady = (game: Game) => {
   return (
@@ -82,6 +60,8 @@ const checkEveryoneReady = (game: Game) => {
 
 let games: Games = {}
 let userToGame: Record<string, string> = {}
+let countDownTimeoutId: NodeJS.Timeout | null = null
+const wordGenerator = new WordGenerator()
 
 io.on("connection", (socket: SocketIO.Socket) => {
   console.log("connection", socket.id)
@@ -94,7 +74,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     if (checkGameExist()) delete getGame().participants[socket.id]
     delete userToGame[socket.id]
   }
-  const sendError = (error: string) => socket.emit("error", error)
+  const sendError = (error: string) => socket.emit("gameError", error)
   const checkGameExist = () => {
     const gameName = getGameName()
     if (!games[gameName]) {
@@ -108,6 +88,22 @@ io.on("connection", (socket: SocketIO.Socket) => {
   const emitGame = () => {
     if (!checkGameExist()) return
     emitToRoom("game", getGame())
+  }
+  const createTurn = (game: Game): GameTurn => {
+    const newTurn = {
+      painterPlayerId: getNextPainter(game),
+      isPainterReady: false,
+      painterWord: wordGenerator.newWord(),
+      correctGuessPlayerIds: [],
+      status: GameTurnStatuses.ACTIVE,
+      turnEndTS: Date.now() + MS_TURN
+    }
+    countDownTimeoutId = setTimeout(() => {
+      newTurn.status = GameTurnStatuses.ENDED
+      emitGame()
+      setTimeout(startNewTurn, 5000)
+    }, MS_TURN)
+    return newTurn
   }
   const removeGame = (name: string) => {
     delete games[name]
@@ -134,7 +130,14 @@ io.on("connection", (socket: SocketIO.Socket) => {
       game.currentTurn?.painterWord.toLocaleLowerCase().trim()
     )
   }
-
+  const startNewTurn = () => {
+    countDownTimeoutId && clearTimeout(countDownTimeoutId)
+    countDownTimeoutId = null
+    const game = getGame()
+    game.currentTurn = createTurn(game)
+    game.painterIdHistory.push(game.currentTurn.painterPlayerId)
+    emitGame()
+  }
   socket.on("webrtcOffer", (id: string, message: string) => {
     socket.to(id).emit("webrtcOffer", socket.id, message)
   })
@@ -172,12 +175,15 @@ io.on("connection", (socket: SocketIO.Socket) => {
         game.currentTurn.status = GameTurnStatuses.ENDED
       }
       emitGame()
-      setTimeout(() => {
-        const game = getGame()
-        game.currentTurn = createTurn(game)
-        game.painterIdHistory.push(game.currentTurn.painterPlayerId)
-        emitGame()
-      }, 5000)
+
+      // check if all players have guessed correct
+      if (
+        Object.values(game.participants).length ===
+        game.currentTurn?.correctGuessPlayerIds.length
+      ) {
+        game.currentTurn.status = GameTurnStatuses.ENDED
+        setTimeout(startNewTurn, 5000)
+      }
       return
     }
     game.participants[socket.id].guesses.push({
@@ -193,9 +199,11 @@ io.on("connection", (socket: SocketIO.Socket) => {
 
   socket.on("markAsReady", () => {
     const game = getGame()
-    getPlayer().isReady = true
+    const player = getPlayer()
+    player.isReady = true
     const shouldGameStart = checkEveryoneReady(game)
-    if (shouldGameStart) game.currentTurn = createTurn(game)
+    // if (shouldGameStart)
+    game.currentTurn = createTurn(game)
     emitGame()
   })
 

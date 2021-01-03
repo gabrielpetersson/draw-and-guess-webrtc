@@ -14,7 +14,9 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "build:apk": "cd android && ./gradlew bundleRelease",
+    "build:aab": "cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
     "@types/react-native-canvas": "^0.1.5",

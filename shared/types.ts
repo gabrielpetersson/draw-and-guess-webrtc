@@ -17,6 +17,7 @@ export interface GameTurn {
   painterWord: string
   correctGuessPlayerIds: string[]
   status: "ENDED" | "ACTIVE" // not a type due some transpilation bugs
+  turnEndTS: number
 }
 
 export interface Game {

@@ -78,7 +78,9 @@ export const useWebRTC = () => {
   }
 
   React.useEffect(() => {
-    const socket = io("ws://192.168.1.232:8000")
+    // const socket = io("ws://192.168.8.100:8000")
+    const socket = io("wss://draw-and-guess-webrtc.herokuapp.com/")
+
     socket.on("connect", () => {
       console.log("connected")
 
@@ -124,7 +126,7 @@ export const useWebRTC = () => {
       socket.on(
         "webrtcOffer",
         async (id: string, offer: RTCSessionDescriptionType) => {
-          console.log("GOT OFFEEEEEEEEEEEEEEEEEEEEEEEEEEER")
+          console.log("offer from", id)
           const prevPeer = peerConnections.current.get(id)
           if (prevPeer?.signalingState === "stable") {
             console.log("offer on established con")
@@ -195,8 +197,13 @@ export const useWebRTC = () => {
         setGame(null)
       })
 
+      socket.on("gameError", (error: string) => {
+        setError(error)
+        setTimeout(() => setError(""), 5000) // quickfix, should be removed on actions instead
+      })
+
       socket.on("error", (error: string) => {
-        console.log("GOT ERROR", error)
+        console.log("[socket error]", error)
         setError(error)
         setTimeout(() => setError(""), 5000) // quickfix, should be removed on actions instead
       })

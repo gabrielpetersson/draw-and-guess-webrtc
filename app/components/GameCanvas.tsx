@@ -2,6 +2,7 @@ import React from "react"
 import { Animated, PanResponder, PanResponderInstance } from "react-native"
 import Canvas from "react-native-canvas"
 import { getCanvasSize } from "../lib/canvasSize"
+import { BORDER_COLOR } from "../lib/constants"
 import { Line, LineHandler, Point } from "../lib/useLines"
 import { IWebRTCLineHandler } from "../requests/setupWebRTC"
 
@@ -116,7 +117,7 @@ export const GameCanvas = ({
           borderWidth: 1,
           backgroundColor: "white",
           borderRadius: 4,
-          borderColor: isPainter ? "black" : "transparent"
+          borderColor: isPainter ? BORDER_COLOR : "transparent"
         }}
         // @ts-ignore - width and height indeed does exist here.
         width={canvasSize}
