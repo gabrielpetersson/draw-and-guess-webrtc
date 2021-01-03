@@ -23,12 +23,11 @@ export class WordGenerator {
   private generate = () => words[Math.floor(Math.random() * words.length)]
   newWord = () => {
     let newWord = this.generate()
-    while (newWord !== null && !this.usedWords.includes(newWord)) {
-      console.log(newWord, this.usedWords)
+    while (this.usedWords.includes(newWord)) {
       newWord = this.generate()
       if (this.usedWords.length === words.length) this.usedWords = []
     }
-    console.log("CHOOOOOOSE", newWord)
+    this.usedWords.push(newWord)
     return newWord
   }
 }

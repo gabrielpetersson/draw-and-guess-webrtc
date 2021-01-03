@@ -147,9 +147,7 @@ const CountDownWrapper = styled.View`
 `
 const CountDown = ({ game }: { game: Game }) => {
   const [timeLeft, setTimeLeft] = React.useState<number | null>(null)
-  console.log(game.currentTurn)
   if (!game.currentTurn?.turnEndTS) return null
-
   useInterval(() => {
     game.currentTurn &&
       setTimeLeft(
