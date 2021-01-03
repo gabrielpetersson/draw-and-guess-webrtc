@@ -20,12 +20,15 @@ export class WordGenerator {
   constructor() {
     this.usedWords = []
   }
+  private generate = () => words[Math.floor(Math.random() * words.length)]
   newWord = () => {
-    let newWord = ""
-    while (newWord && !this.usedWords.includes(newWord)) {
-      newWord = words[Math.floor(Math.random() * words.length)]
+    let newWord = this.generate()
+    while (newWord !== null && !this.usedWords.includes(newWord)) {
+      console.log(newWord, this.usedWords)
+      newWord = this.generate()
       if (this.usedWords.length === words.length) this.usedWords = []
     }
+    console.log("CHOOOOOOSE", newWord)
     return newWord
   }
 }
