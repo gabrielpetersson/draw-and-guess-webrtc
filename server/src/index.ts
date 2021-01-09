@@ -12,6 +12,7 @@ import {
   Player,
   GameTurn
 } from "../../shared"
+import { PainterManager } from "./painter-manager"
 import { GameTurnStatuses } from "./types"
 import { WordGenerator } from "./word-generator"
 
@@ -33,22 +34,6 @@ const createUser = (id: string, name: string): Player => ({
   isReady: false
 })
 
-const getRandomPlayer = (game: Game) =>
-  Object.values(game.participants)[
-    Math.floor(Math.random() * Object.values(game.participants).length)
-  ]
-
-const getNextPainter = (game: Game) => {
-  if (!game.currentTurn?.painterPlayerId) return getRandomPlayer(game).id
-  const lastIndex = Object.values(game.participants).findIndex(
-    p => p.id === game.currentTurn?.painterPlayerId
-  )
-  const nextIndex = lastIndex + 1
-  if (nextIndex >= Object.values(game.participants).length - 1) {
-    return Object.values(game.participants)[0].id
-  } else return Object.values(game.participants)[nextIndex].id
-}
-
 const MS_TURN = 60000
 
 const checkEveryoneReady = (game: Game) => {
@@ -62,6 +47,7 @@ let games: Games = {}
 let userToGame: Record<string, string> = {}
 let countDownTimeoutId: NodeJS.Timeout | null = null
 const wordGenerator = new WordGenerator()
+const painterManager = new PainterManager()
 
 io.on("connection", (socket: SocketIO.Socket) => {
   console.log("connection", socket.id)
@@ -91,7 +77,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
   }
   const createTurn = (game: Game): GameTurn => {
     const newTurn = {
-      painterPlayerId: getNextPainter(game),
+      painterPlayerId: painterManager.getNextPainterId(game),
       isPainterReady: false,
       painterWord: wordGenerator.newWord(),
       correctGuessPlayerIds: [],
