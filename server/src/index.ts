@@ -85,6 +85,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
       turnEndTS: Date.now() + MS_TURN
     }
     countDownTimeoutId = setTimeout(() => {
+      if (newTurn.status === GameTurnStatuses.ENDED) return
       newTurn.status = GameTurnStatuses.ENDED
       emitGame()
       setTimeout(startNewTurn, 5000)
@@ -154,20 +155,14 @@ io.on("connection", (socket: SocketIO.Socket) => {
       const player = getPlayer()
       player.points += 1
       game.currentTurn?.correctGuessPlayerIds.push(socket.id)
-      if (
-        game.currentTurn.correctGuessPlayerIds.length >=
-        Object.values(game.participants).length - 1
-      ) {
-        game.currentTurn.status = GameTurnStatuses.ENDED
-      }
-      emitGame()
 
       // check if all players have guessed correct
       if (
         Object.values(game.participants).length ===
-        game.currentTurn?.correctGuessPlayerIds.length
+        game.currentTurn?.correctGuessPlayerIds.length - 1
       ) {
         game.currentTurn.status = GameTurnStatuses.ENDED
+        emitGame()
         setTimeout(startNewTurn, 5000)
       }
       return
