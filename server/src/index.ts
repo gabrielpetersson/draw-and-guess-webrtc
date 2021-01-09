@@ -72,6 +72,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     return !!(checkGameExist && getGame().currentTurn)
   }
   const emitGame = () => {
+    console.log(checkGameExist(), "game exist")
     if (!checkGameExist()) return
     emitToRoom("game", getGame())
   }
@@ -88,6 +89,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
       if (newTurn.status === GameTurnStatuses.ENDED) return
       newTurn.status = GameTurnStatuses.ENDED
       emitGame()
+      console.log("NEW ON TIMEOUT")
       setTimeout(startNewTurn, 5000)
     }, MS_TURN)
     return newTurn
@@ -121,6 +123,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     countDownTimeoutId && clearTimeout(countDownTimeoutId)
     countDownTimeoutId = null
     const game = getGame()
+    console.log("STARTED NEW GTURN", game)
     game.currentTurn = createTurn(game)
     game.painterIdHistory.push(game.currentTurn.painterPlayerId)
     emitGame()
@@ -158,11 +161,12 @@ io.on("connection", (socket: SocketIO.Socket) => {
 
       // check if all players have guessed correct
       if (
-        Object.values(game.participants).length ===
-        game.currentTurn?.correctGuessPlayerIds.length - 1
+        Object.values(game.participants).length - 1 ===
+        game.currentTurn?.correctGuessPlayerIds.length
       ) {
         game.currentTurn.status = GameTurnStatuses.ENDED
         emitGame()
+        console.log("NEW ON CORRECT GUESS")
         setTimeout(startNewTurn, 5000)
       }
       return
@@ -236,6 +240,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     socket.join(opts.gameName)
     socket.emit("playerId", socket.id)
     broadcastToRoom("webrtcWatcher", socket.id)
+    console.log("emitting game?")
     emitGame()
   })
 

@@ -12,6 +12,10 @@ import { Point, useLines } from "../lib/useLines"
 
 registerGlobals()
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
+const dataChannelOptions = {
+  ordered: false,
+  maxRetransmits: 0 // in milliseconds
+}
 
 export interface IWebRTCLineHandler {
   sendPoint: (p: Point) => void
@@ -79,6 +83,7 @@ export const useWebRTC = () => {
 
   React.useEffect(() => {
     // const socket = io("ws://192.168.8.100:8000")
+    // const socket = io("ws://192.168.8.100:8000")
     const socket = io("wss://draw-and-guess-webrtc.herokuapp.com/")
 
     socket.on("connect", () => {
@@ -93,7 +98,8 @@ export const useWebRTC = () => {
         }
         const localConnection = new RTCPeerConnection(config)
         const dataChannel = (localConnection.createDataChannel(
-          "text"
+          "text",
+          dataChannelOptions
         ) as unknown) as RTCDataChannel // types are outdated
 
         dataChannel.onerror = err => {

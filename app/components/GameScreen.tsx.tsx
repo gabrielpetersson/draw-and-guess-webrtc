@@ -50,9 +50,12 @@ const PlayerName = styled.Text`
 const Guess = styled.Text`
   position: absolute;
   left: 0;
-  background-color: white;
+  justify-content: center;
+  align-items: center;
   border-radius: 4px;
-  padding: 4px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   font-size: 12px;
   width: 100%;
   color: black;
@@ -131,6 +134,8 @@ const getPlayerColor = (player: Player, game: Game) => {
 }
 const getPlayerBorderColor = (player: Player, game: Game) => {
   if (player.id === game.currentTurn?.painterPlayerId) return "white"
+  if (game.currentTurn?.correctGuessPlayerIds.includes(player.id))
+    return "white"
   return BORDER_COLOR
   // if (!player.isReady) return "white"
   // if (game.currentTurn?.correctGuessPlayerIds.includes(player.id))
@@ -277,9 +282,16 @@ export const GameScreen = ({
                       style={{
                         position: "absolute",
                         left: 0,
-                        top: i * -34 - 30,
+                        top: i * -30 - 30,
                         width: "100%",
-                        opacity: animation
+                        height: 24,
+                        opacity: animation,
+                        backgroundColor: "white",
+                        borderRadius: 4,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderColor: BORDER_COLOR,
+                        borderWidth: 1
                       }}
                       key={guess.id}
                     >
@@ -300,6 +312,10 @@ export const GameScreen = ({
               placeholderTextColor="black"
               placeholder="Guess.."
               defaultValue={guess}
+              autoCapitalize={"none"}
+              autoCorrect={false}
+              autoFocus
+              autoCompleteType={"off"}
               onChangeText={(text: string) => setGuess(text)}
               blurOnSubmit={false}
               onSubmitEditing={() => {
