@@ -76,7 +76,8 @@ io.on("connection", (socket: SocketIO.Socket) => {
     if (!checkGameExist()) return
     emitToRoom("game", getGame())
   }
-  const createTurn = (game: Game): GameTurn => {
+  const createTurn = (game: Game): GameTurn | undefined => {
+    if (!game) return
     const newTurn = {
       painterPlayerId: painterManager.getNextPainterId(game),
       isPainterReady: false,
@@ -120,12 +121,15 @@ io.on("connection", (socket: SocketIO.Socket) => {
     )
   }
   const startNewTurn = () => {
+    const game = getGame()
+    if (!game) return // some bug causes game not to be defined when game ends and crashes server
     countDownTimeoutId && clearTimeout(countDownTimeoutId)
     countDownTimeoutId = null
-    const game = getGame()
     console.log("STARTED NEW GTURN", game)
     game.currentTurn = createTurn(game)
-    game.painterIdHistory.push(game.currentTurn.painterPlayerId)
+    if (game.currentTurn?.painterPlayerId) {
+      game.painterIdHistory.push(game.currentTurn.painterPlayerId)
+    }
     emitGame()
   }
   socket.on("webrtcOffer", (id: string, message: string) => {
