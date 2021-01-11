@@ -62,6 +62,9 @@ export const JoinGameScreen = ({
         placeholder="Your name"
         value={playerName}
         placeholderTextColor={"#999"}
+        autoCapitalize={"none"}
+        autoCorrect={false}
+        autoFocus
       ></GameInfoInput>
       <Spacer height={30} />
       <GameInfoInput
@@ -69,6 +72,9 @@ export const JoinGameScreen = ({
         placeholderTextColor={"#999"}
         onChangeText={(text: string) => text.length < 10 && setGameName(text)}
         value={gameName}
+        autoCapitalize={"none"}
+        autoCorrect={false}
+        autoFocus
       ></GameInfoInput>
       <Spacer height={30} />
       <LowerButtonContainer>

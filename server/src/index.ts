@@ -223,6 +223,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     }
     socket.join(opts.gameName)
     socket.emit("playerId", socket.id)
+    console.log("Created game", opts.gameName, opts.playerName)
     emitGame()
   })
 
@@ -244,7 +245,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     socket.join(opts.gameName)
     socket.emit("playerId", socket.id)
     broadcastToRoom("webrtcWatcher", socket.id)
-    console.log("emitting game?")
+    console.log("Joined game", opts.gameName, opts.playerName)
     emitGame()
   })
 
