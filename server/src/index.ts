@@ -72,7 +72,6 @@ io.on("connection", (socket: SocketIO.Socket) => {
     return !!(checkGameExist && getGame().currentTurn)
   }
   const emitGame = () => {
-    console.log(checkGameExist(), "game exist")
     if (!checkGameExist()) return
     emitToRoom("game", getGame())
   }
@@ -90,7 +89,6 @@ io.on("connection", (socket: SocketIO.Socket) => {
       if (newTurn.status === GameTurnStatuses.ENDED) return
       newTurn.status = GameTurnStatuses.ENDED
       emitGame()
-      console.log("NEW ON TIMEOUT")
       setTimeout(startNewTurn, 5000)
     }, MS_TURN)
     return newTurn
@@ -125,7 +123,6 @@ io.on("connection", (socket: SocketIO.Socket) => {
     if (!game) return // some bug causes game not to be defined when game ends and crashes server
     countDownTimeoutId && clearTimeout(countDownTimeoutId)
     countDownTimeoutId = null
-    console.log("STARTED NEW GTURN", game)
     game.currentTurn = createTurn(game)
     if (game.currentTurn?.painterPlayerId) {
       game.painterIdHistory.push(game.currentTurn.painterPlayerId)
@@ -170,7 +167,6 @@ io.on("connection", (socket: SocketIO.Socket) => {
       ) {
         game.currentTurn.status = GameTurnStatuses.ENDED
         emitGame()
-        console.log("NEW ON CORRECT GUESS")
         setTimeout(startNewTurn, 5000)
       }
       return
