@@ -307,7 +307,7 @@ export const GameScreen = ({
           })}
         </Players>
         <GuessingContainer>
-          {isPainter ? null : (
+          {isPainter || !(game.currentTurn?.status === "ACTIVE") ? null : (
             <TextInput
               placeholderTextColor="black"
               placeholder="Guess.."

@@ -154,9 +154,9 @@ export const useWebRTC = () => {
             channel.onopen = () => setDataChannel(channel)
           }
 
-          if (localConnection.signalingState === "stable")
-            //return
-            await localConnection.setRemoteDescription(offer)
+          // if (localConnection.signalingState === "stable")
+          //return
+          await localConnection.setRemoteDescription(offer)
           const localDescription = await localConnection.createAnswer()
           await localConnection.setLocalDescription(localDescription)
           socket.emit("webrtcAnswer", id, localDescription)

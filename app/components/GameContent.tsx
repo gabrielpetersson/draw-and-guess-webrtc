@@ -82,7 +82,9 @@ export const GameContent = ({
   let content: React.ReactNode
   const isReady = isLocalPlayerReady(game, localPlayerId)
   const isPaineterReady = !!game.currentTurn?.isPainterReady
-  const isPainter = isLocalPlayerPainter(game, localPlayerId)
+  const hasGameStarted = game.currentTurn?.status === "ACTIVE"
+  const isPainter = isLocalPlayerPainter(game, localPlayerId) && hasGameStarted // quickfix for not allowing painting if game not started
+
   if (!isReady) {
     content = (
       <TouchableWithoutFeedback onPress={markAsReady}>
