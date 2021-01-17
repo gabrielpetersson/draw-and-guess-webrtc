@@ -77,22 +77,26 @@ export const GameCanvas = ({
     panResponder,
     setPanResponder
   ] = React.useState<PanResponderInstance | null>(null)
-
   const { endLine, createNewLine, addNewPoint, lines } = lineHandler
+
   React.useEffect(() => {
-    if (!isPainter) return // only allow for current painter to paint
-    setPanResponder(
-      createPanResponder({
-        endLine,
-        createNewLine: () => {
-          createNewLine()
-          webRTCLineHandler.sendNewLine()
-        },
-        addNewPoint: (p: Point) => {
-          addNewPoint(p)
-          webRTCLineHandler.sendPoint(p)
-        }
-      })
+    if (!isPainter) return
+    setTimeout(
+      () =>
+        setPanResponder(
+          createPanResponder({
+            endLine,
+            createNewLine: () => {
+              createNewLine()
+              webRTCLineHandler.sendNewLine()
+            },
+            addNewPoint: (p: Point) => {
+              addNewPoint(p)
+              webRTCLineHandler.sendPoint(p)
+            }
+          })
+        ),
+      300 // otherwise starts drawing when tapping the button
     )
   }, [endLine, createNewLine, addNewPoint])
 

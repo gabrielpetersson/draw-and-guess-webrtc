@@ -66,11 +66,17 @@ export const MenuScreen = ({
       ) : (
         <ButtonContainer>
           <MenuButton onPress={() => setStartGameType(StartGameTypes.join)}>
-            <Text style={{ color: "#333", fontWeight: "bold" }}> Join </Text>
+            <Text style={{ color: "#333", fontWeight: "bold" }}>
+              {" "}
+              Join Game
+            </Text>
           </MenuButton>
           <Spacer height={30} />
           <MenuButton onPress={() => setStartGameType(StartGameTypes.create)}>
-            <Text style={{ color: "#333", fontWeight: "bold" }}> Create </Text>
+            <Text style={{ color: "#333", fontWeight: "bold" }}>
+              {" "}
+              Create Game
+            </Text>
           </MenuButton>
         </ButtonContainer>
       )}

@@ -9,6 +9,7 @@ import { io, Socket } from "socket.io-client/build/index"
 import { CreateGameOptions, Game, JoinGameOptions } from "../../shared"
 import { getCanvasSize } from "../lib/canvasSize"
 import { Point, useLines } from "../lib/useLines"
+import { throttle } from "lodash"
 
 registerGlobals()
 const config = { iceServers: [{ url: "stun:stun.l.google.com:19302" }] }
@@ -55,8 +56,8 @@ export const useWebRTC = () => {
     }
   }, [dataChannel])
 
-  const truncate = (n: number) => Math.floor(100 * n + 0.5) / 100
-  const sendPoint = (point: Point) => {
+  const truncate = (n: number) => Math.floor(100000 * n + 0.5) / 100000
+  const sendPoint = throttle((point: Point) => {
     if (!dataChannel) return
     const size = getCanvasSize()
     const normalizedPoint = [
@@ -64,8 +65,9 @@ export const useWebRTC = () => {
       truncate(point.x / size),
       truncate(point.y / size)
     ]
+    // todo: send as arraybuffer, for some reason nothing is received though
     dataChannel?.send(JSON.stringify(normalizedPoint))
-  }
+  }, 10)
   const sendNewLine = () => {
     if (!dataChannel) return
     dataChannel?.send(JSON.stringify([1]))

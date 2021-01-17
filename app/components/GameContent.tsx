@@ -83,7 +83,8 @@ export const GameContent = ({
   const isReady = isLocalPlayerReady(game, localPlayerId)
   const isPaineterReady = !!game.currentTurn?.isPainterReady
   const hasGameStarted = game.currentTurn?.status === "ACTIVE"
-  const isPainter = isLocalPlayerPainter(game, localPlayerId) && hasGameStarted // quickfix for not allowing painting if game not started
+  const isPainter = isLocalPlayerPainter(game, localPlayerId)
+  const isPainerAndCanPaint = isPainter && hasGameStarted // quickfix for not allowing drawing to early
 
   if (!isReady) {
     content = (
@@ -103,6 +104,9 @@ export const GameContent = ({
     const guessedCorrect = game.currentTurn.correctGuessPlayerIds.includes(
       localPlayerId
     )
+    console.log(game.currentTurn?.painterPlayerId, localPlayerId)
+    console.log(game, "GAME")
+    console.log("ispainter", isPainter)
     let roundOverText
     if (isPainter && nCorrectGuesses === 0) {
       roundOverText =
@@ -129,7 +133,7 @@ export const GameContent = ({
         ) : null}
       </GameUpdateContainer>
     )
-  } else if (!isPaineterReady && isPainter) {
+  } else if (!isPaineterReady && isPainerAndCanPaint) {
     content = (
       <GameUpdateContainer>
         <MessageUpdateText>{`Your turn to draw! Draw a ${game.currentTurn?.painterWord}`}</MessageUpdateText>
@@ -150,14 +154,16 @@ export const GameContent = ({
                   p => p.id === game.currentTurn?.painterPlayerId
                 )?.name
               } to start painting...`
-            : "Waiting until all players are ready"}
+            : Object.values(game.participants).length === 1
+            ? `You seem to be waiting alone! Ask your friends to download this app, make them click 'Join Game', and enter '${game.name}' as the game name. Have fun playing!`
+            : "Waiting until all players are ready."}
         </MessageUpdateText>
       </GameUpdateContainer>
     )
   } else
     content = (
       <GameCanvas
-        isPainter={isPainter}
+        isPainter={isPainerAndCanPaint}
         lineHandler={lineHandler}
         webRTCLineHandler={webRTCLineHandler}
       />
