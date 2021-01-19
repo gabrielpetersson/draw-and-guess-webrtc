@@ -72,7 +72,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     return true
   }
   const checkTurnExist = () => {
-    return !!(checkGameExist && getGame().currentTurn)
+    return !!(checkGameExist && getGame()?.currentTurn)
   }
   const emitGame = () => {
     if (!checkGameExist()) return
@@ -190,7 +190,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
     const player = getPlayer()
     player.isReady = true
     const shouldGameStart = checkEveryoneReady(game)
-    if (shouldGameStart) game.currentTurn = createTurn(game)
+    if (shouldGameStart && game) game.currentTurn = createTurn(game)
     emitGame()
   })
 
@@ -233,7 +233,7 @@ io.on("connection", (socket: SocketIO.Socket) => {
       )
       return
     }
-    if (games[opts.gameName].currentTurn) {
+    if (games[opts.gameName]?.currentTurn) {
       sendError(
         "This game has already started. Try creating a new one, or join another game!"
       )
@@ -255,6 +255,9 @@ io.on("connection", (socket: SocketIO.Socket) => {
   socket.emit("leaveGame") // for server restarts
   socket.on("error", e => {
     console.info("[server default error]", e)
+  })
+  socket.on("clientInfo", e => {
+    console.info("[info]", e, "   |  ", socket.id)
   })
   socket.onAny(e => {
     console.info("[server event]", e)

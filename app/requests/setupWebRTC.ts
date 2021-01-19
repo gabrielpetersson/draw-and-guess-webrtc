@@ -85,8 +85,8 @@ export const useWebRTC = () => {
 
   React.useEffect(() => {
     // const socket = io("ws://192.168.8.100:8000")
-    // const socket = io("ws://192.168.8.100:8000")
-    const socket = io("wss://draw-and-guess-webrtc.herokuapp.com/")
+    const socket = io("ws://192.168.8.100:8000")
+    // const socket = io("wss://draw-and-guess-webrtc.herokuapp.com/")
 
     socket.on("connect", () => {
       console.log("connected")
@@ -109,6 +109,8 @@ export const useWebRTC = () => {
         }
 
         dataChannel.onopen = () => {
+          console.log("[webrtc]", "data channel opened")
+          socket.emit("clientInfo", `data channel open`)
           setDataChannel(dataChannel)
         }
 
@@ -177,6 +179,7 @@ export const useWebRTC = () => {
           const localConnection = peerConnections.current.get(id)
           if (!localConnection) {
             console.error("Did not find peer")
+            socket.emit("info", "Did not find peer")
             return
           }
           if (localConnection.signalingState === "stable") {
