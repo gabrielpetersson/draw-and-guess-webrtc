@@ -60,7 +60,10 @@ io.on("connection", (socket: SocketIO.Socket) => {
     if (checkGameExist()) delete getGame().participants[socket.id]
     delete userToGame[socket.id]
   }
-  const sendError = (error: string) => socket.emit("gameError", error)
+  const sendError = (error: string) => {
+    console.log(`[error]`, error)
+    socket.emit("gameError", error)
+  }
   const checkGameExist = () => {
     const gameName = getGameName()
     if (!games[gameName]) {
@@ -225,11 +228,15 @@ io.on("connection", (socket: SocketIO.Socket) => {
 
   socket.on("joinGame", (opts: JoinGameOptions) => {
     if (!games[opts.gameName]) {
-      sendError("Game does not exist")
+      sendError(
+        "Game does not exist. Try creating it by pressing 'Create Game' and invite your friends!"
+      )
       return
     }
     if (games[opts.gameName].currentTurn) {
-      sendError("Game has already started")
+      sendError(
+        "This game has already started. Try creating a new one, or join another game!"
+      )
       return
     }
     socket.join(opts.gameName)
@@ -246,7 +253,9 @@ io.on("connection", (socket: SocketIO.Socket) => {
   })
 
   socket.emit("leaveGame") // for server restarts
-
+  socket.on("error", e => {
+    console.info("[server default error]", e)
+  })
   socket.onAny(e => {
     console.info("[server event]", e)
   })
