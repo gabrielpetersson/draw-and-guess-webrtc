@@ -4,3 +4,6 @@
 **/build
 .vscode
 **/.expo*
+**/relkey.keystore
+**/gradle.properties
+**/.secrets
